@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI TREND — Prompt Builder</title>
+<style>
+:root{
+  --bg:#09080f;--surface:#131120;--surface2:#1c1a2e;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#f0eeff;--text2:#9991cc;--text3:#6b639b;
+  --radius:12px;--hh:52px;
+}
+[data-theme=light]{
+  --bg:#eeecff;--surface:#ffffff;--surface2:#f3f1ff;
+  --border:rgba(104,91,199,0.15);--border2:rgba(104,91,199,0.25);
+  --text:#1a1530;--text2:#6b5fa0;--text3:#a09ac0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;height:100vh;overflow:hidden;transition:background .3s,color .3s}
+
+/* ── HEADER ── */
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;z-index:100;transition:background .3s}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0;text-decoration:none}
+.logo-sq{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#685BC7,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.logo-txt{font-size:14px;font-weight:500;color:var(--text)}
+.logo-txt b{color:#8b5cf6;font-weight:800}
+.hdr-mid{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
+.pills{display:flex;gap:4px}
+.pill{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .25s}
+.pill.on{background:#685BC7}
+.pcnt{font-size:11px;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.hdr-r{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.tog{width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;transition:background .3s;background:var(--border2);flex-shrink:0}
+[data-theme=dark] .tog{background:#685BC7}
+.tog-ball{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:transform .3s;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;pointer-events:none}
+[data-theme=light] .tog-ball{transform:translateX(20px)}
+.btn-main{padding:0 15px;height:34px;border-radius:22px;background:linear-gradient(135deg,#685BC7,#8b5cf6);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .2s,transform .1s;font-family:inherit}
+.btn-main:hover{opacity:.88;transform:scale(1.02)}
+
+/* ── LAYOUT ── */
+.main{display:flex;height:calc(100vh - var(--hh));margin-top:var(--hh);overflow:hidden}
+.col-l{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.col-l::-webkit-scrollbar{width:4px}
+.col-l::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.col-r{flex:1;overflow:hidden;padding:14px;display:flex;flex-direction:column;min-width:0}
+
+/* ── DIVIDER ── */
+.div{width:18px;flex-shrink:0;cursor:col-resize;position:relative;display:flex;align-items:center;justify-content:center;user-select:none}
+.div-line{position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:2px;background:var(--border);transition:background .2s;pointer-events:none}
+.div:hover .div-line,.div.drag .div-line{background:#685BC7}
+.div-pill{position:absolute;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:5px;opacity:0;transition:opacity .2s;z-index:10}
+.div:hover .div-pill{opacity:1}
+.snap-btn{width:20px;height:20px;border-radius:5px;background:#685BC7;border:none;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;font-family:inherit}
+.snap-btn:hover{background:#8b5cf6}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border-radius:var(--radius);border:1.5px solid var(--border);padding:14px;transition:border-color .2s,box-shadow .2s,background .3s;--acc:#685BC7}
+.card.foc{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 14%,transparent)}
+.card-top{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.card-num{width:22px;height:22px;border-radius:5px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.card-em{font-size:15px}
+.card-nm{flex:1;font-size:13px;font-weight:600;color:var(--text)}
+.card-chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s;flex-shrink:0}
+.card-chk.ok{background:var(--acc);border-color:var(--acc);color:#fff}
+.card-q{font-size:13px;font-weight:500;color:var(--text);margin-bottom:9px;line-height:1.45}
+.card-ta{width:100%;min-height:96px;background:var(--surface2);border:2.5px solid var(--acc);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;outline:none;transition:background .3s,color .3s;line-height:1.5}
+.card-ta::placeholder{color:var(--text3);font-style:italic}
+.card-hint{margin-top:7px;font-size:11px;color:var(--text2);display:flex;align-items:flex-start;gap:4px;line-height:1.4}
+
+/* ── WIREFRAME ── */
+.wf-panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;height:100%;transition:background .3s}
+.wf-hdr{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.wf-ttl{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--text2);text-transform:uppercase}
+.browser-wrap{padding:11px;flex:1;overflow:hidden;display:flex;flex-direction:column}
+.b-chrome{background:var(--surface2);border-radius:7px 7px 0 0;padding:7px 9px;display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-bottom:none;flex-shrink:0}
+.tls{display:flex;gap:5px}
+.tl{width:10px;height:10px;border-radius:50%}
+.tl-r{background:#ef4444}.tl-y{background:#f59e0b}.tl-g{background:#22c55e}
+.url-bar{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:4px;height:19px;display:flex;align-items:center;padding:0 7px}
+.url-t{font-size:10px;color:var(--text3);font-family:monospace}
+.b-body{border:1px solid var(--border);border-radius:0 0 7px 7px;overflow-y:auto;flex:1}
+.b-body::-webkit-scrollbar{width:3px}
+.b-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.wfs{position:relative;border-bottom:1px solid var(--border);padding:9px 11px;opacity:.28;transition:opacity .3s,background .3s,border-left-width .2s,border-left-color .2s,border-bottom-color .2s}
+.wfs:last-child{border-bottom:none}
+.wfs.fill{opacity:.65}
+.wfs.act{opacity:1;border-left:5px solid var(--sc,#685BC7);background:color-mix(in srgb,var(--sc,#685BC7) 8%,transparent);border-bottom-color:var(--sc,#685BC7)}
+.wf-lbl{position:absolute;top:4px;right:7px;font-size:8px;font-weight:800;letter-spacing:.08em;color:var(--text3);text-transform:uppercase}
+
+/* wireframe internals */
+.wfr-logo-row{display:flex;align-items:center;justify-content:space-between}
+.wfr-logo{width:26px;height:11px;border-radius:3px;background:#685BC7;opacity:.7}
+.wfr-nav{display:flex;gap:7px}
+.wfr-ni{height:7px;border-radius:2px;background:var(--border2)}
+.wfr-hero{min-height:72px;background:linear-gradient(135deg,rgba(104,91,199,.22),rgba(139,92,246,.14));border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px}
+.wfr-ht{height:9px;border-radius:3px;background:rgba(255,255,255,.28);width:58%}
+.wfr-hs{height:6px;border-radius:2px;background:rgba(255,255,255,.18);width:38%}
+.wfr-hb{height:17px;width:72px;border-radius:9px;background:#685BC7;opacity:.75}
+.wfr-about{display:flex;gap:9px;align-items:flex-start}
+.wfr-av{width:38px;height:38px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.wfr-al{flex:1;display:flex;flex-direction:column;gap:5px}
+.wfr-line{height:6px;border-radius:2px;background:var(--border2)}
+.wfr-skills{display:flex;flex-wrap:wrap;gap:5px}
+.wfr-sk{height:19px;border-radius:10px;background:var(--border2);padding:0 9px;display:flex;align-items:center;font-size:9px;color:var(--text3)}
+.wfr-works{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.wfr-wc{height:38px;border-radius:5px;background:var(--border2);display:flex;align-items:flex-end;padding:4px 6px;overflow:hidden}
+.wfr-wct{font-size:8px;color:var(--text3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:100%}
+.wfr-style-r{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.wfr-cd{width:17px;height:17px;border-radius:50%;flex-shrink:0}
+.wfr-stags{display:flex;gap:4px;flex-wrap:wrap}
+.wfr-stag{height:15px;border-radius:8px;background:var(--border2);padding:0 7px;font-size:8px;display:flex;align-items:center;color:var(--text3)}
+.wfr-contacts{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.wfr-ci{width:26px;height:26px;border-radius:50%;background:var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px}
+
+/* ── MODAL ── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(5px)}
+.ov.open{opacity:1;pointer-events:all}
+.sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:min(700px,96vw);max-height:82vh;background:var(--surface);border-radius:16px 16px 0 0;padding:18px 20px 24px;z-index:201;transition:transform .4s cubic-bezier(.4,0,.2,1),background .3s;overflow-y:auto;display:flex;flex-direction:column;gap:13px}
+.sheet::-webkit-scrollbar{width:4px}
+.sheet::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.ov.open .sheet{transform:translateX(-50%) translateY(0)}
+.sh-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto -4px}
+.sh-top{display:flex;align-items:center;justify-content:space-between}
+.sh-title{font-size:16px;font-weight:700;color:var(--text)}
+.sh-close{width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;font-family:inherit}
+.sh-close:hover{background:var(--border2)}
+.api-lbl{font-size:11px;color:var(--text2);font-weight:600;margin-bottom:5px}
+.api-in{width:100%;height:36px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:0 11px;color:var(--text);font-size:13px;font-family:monospace;outline:none;transition:border-color .2s}
+.api-in:focus{border-color:#685BC7}
+.lang-tabs{display:flex;gap:6px}
+.ltab{padding:5px 14px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text2);font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit}
+.ltab.on{background:#685BC7;border-color:#685BC7;color:#fff}
+.stat-row{display:flex;align-items:center;gap:6px}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background .2s}
+.sdot.ready{background:#22c55e}
+.sdot.loading{background:#f59e0b;animation:blink 1s infinite}
+.sdot.err{background:#ef4444}
+.stxt{font-size:12px;color:var(--text2)}
+.pout{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:11px 13px;font-family:monospace;font-size:12px;color:var(--text);white-space:pre-wrap;min-height:180px;max-height:38vh;overflow-y:auto;line-height:1.65;transition:background .3s}
+.pout::-webkit-scrollbar{width:4px}
+.pout::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.modal-acts{display:flex;gap:8px}
+.btn-copy{padding:0 15px;height:36px;border-radius:8px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-copy:hover{border-color:#685BC7;color:#8b5cf6}
+.btn-gen{flex:1;height:36px;border-radius:8px;background:linear-gradient(135deg,#685BC7,#8b5cf6);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s;font-family:inherit}
+.btn-gen:hover{opacity:.88}
+.btn-gen:disabled{opacity:.45;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-sq">AI</div>
+    <span class="logo-txt">AI <b>TREND</b></span>
+  </div>
+
+  <div class="hdr-mid">
+    <div class="pills" id="pills">
+      <div class="pill"></div><div class="pill"></div><div class="pill"></div><div class="pill"></div>
+      <div class="pill"></div><div class="pill"></div><div class="pill"></div><div class="pill"></div>
+    </div>
+    <span class="pcnt" id="pcnt">0 / 8 блоков</span>
+  </div>
+
+  <div class="hdr-r">
+    <button class="tog" id="tog" onclick="toggleTheme()">
+      <div class="tog-ball" id="togBall">🌙</div>
+    </button>
+    <button class="btn-main" onclick="openModal()">✨ Получить промпт</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main" id="main">
+  <div class="col-l" id="colL" style="width:50%"></div>
+
+  <!-- DIVIDER -->
+  <div class="div" id="divider">
+    <div class="div-line"></div>
+    <div class="div-pill">
+      <button class="snap-btn" onclick="snap(30)" title="30%">◀</button>
+      <button class="snap-btn" onclick="snap(70)" title="70%">▶</button>
+    </div>
+  </div>
+
+  <div class="col-r" id="colR">
+    <div class="wf-panel">
+      <div class="wf-hdr">
+        <div class="live-dot"></div>
+        <span class="wf-ttl">Структура сайта</span>
+      </div>
+      <div class="browser-wrap">
+        <div class="b-chrome">
+          <div class="tls"><div class="tl tl-r"></div><div class="tl tl-y"></div><div class="tl tl-g"></div></div>
+          <div class="url-bar"><span class="url-t" id="urlT">mysite.ru</span></div>
+        </div>
+        <div class="b-body" id="bBody">
+
+          <!-- HEADER section -->
+          <div class="wfs" id="wfs-header" style="--sc:#3b82f6">
+            <span class="wf-lbl">ШАПКА</span>
+            <div class="wfr-logo-row">
+              <div class="wfr-logo" id="wfLogo"></div>
+              <div class="wfr-nav" id="wfNav">
+                <div class="wfr-ni" style="width:28px"></div>
+                <div class="wfr-ni" style="width:34px"></div>
+                <div class="wfr-ni" style="width:24px"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HERO section -->
+          <div class="wfs" id="wfs-hero" style="--sc:#f59e0b">
+            <span class="wf-lbl">ГЛАВНЫЙ</span>
+            <div class="wfr-hero">
+              <div class="wfr-ht" id="wfHT"></div>
+              <div class="wfr-hs" id="wfHS"></div>
+              <div class="wfr-hb" id="wfHB"></div>
+            </div>
+          </div>
+
+          <!-- ABOUT section -->
+          <div class="wfs" id="wfs-about" style="--sc:#22c55e">
+            <span class="wf-lbl">ОБО МНЕ</span>
+            <div class="wfr-about">
+              <div class="wfr-av" id="wfAv"></div>
+              <div class="wfr-al">
+                <div class="wfr-line" style="width:68%"></div>
+                <div class="wfr-line" style="width:88%"></div>
+                <div class="wfr-line" style="width:55%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SKILLS section -->
+          <div class="wfs" id="wfs-skills" style="--sc:#ec4899">
+            <span class="wf-lbl">НАВЫКИ</span>
+            <div class="wfr-skills" id="wfSkills">
+              <div class="wfr-sk">навык</div>
+              <div class="wfr-sk">навык</div>
+              <div class="wfr-sk">навык</div>
+            </div>
+          </div>
+
+          <!-- WORKS section -->
+          <div class="wfs" id="wfs-works" style="--sc:#ef4444">
+            <span class="wf-lbl">РАБОТЫ</span>
+            <div class="wfr-works" id="wfWorks">
+              <div class="wfr-wc"></div><div class="wfr-wc"></div>
+              <div class="wfr-wc"></div><div class="wfr-wc"></div>
+            </div>
+          </div>
+
+          <!-- STYLE section -->
+          <div class="wfs" id="wfs-style" style="--sc:#a855f7">
+            <span class="wf-lbl">СТИЛЬ</span>
+            <div class="wfr-style-r">
+              <div class="wfr-cd" id="wfC1" style="background:#685BC7"></div>
+              <div class="wfr-cd" id="wfC2" style="background:#8b5cf6"></div>
+              <div class="wfr-cd" id="wfC3" style="background:#a78bfa"></div>
+              <div class="wfr-stags" id="wfSTags">
+                <div class="wfr-stag">минимализм</div>
+                <div class="wfr-stag">современный</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTACTS section -->
+          <div class="wfs" id="wfs-contacts" style="--sc:#06b6d4">
+            <span class="wf-lbl">КОНТАКТЫ</span>
+            <div class="wfr-contacts" id="wfCont">
+              <div class="wfr-ci">✉️</div>
+              <div class="wfr-ci">📱</div>
+              <div class="wfr-ci">🔗</div>
+            </div>
+          </div>
+
+        </div><!-- /b-body -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="ov" id="ov" onclick="ovClick(event)">
+  <div class="sheet" id="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-top">
+      <div class="sh-title">✨ Конструктор промпта</div>
+      <button class="sh-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div>
+      <div class="api-lbl">🔑 OpenAI API ключ</div>
+      <input class="api-in" type="password" id="apiIn" placeholder="sk-..." autocomplete="off">
+    </div>
+
+    <div class="lang-tabs">
+      <button class="ltab on" id="tabRu" onclick="setLang('ru')">🇷🇺 Русский</button>
+      <button class="ltab" id="tabEn" onclick="setLang('en')">🇬🇧 English</button>
+    </div>
+
+    <div class="stat-row">
+      <div class="sdot" id="sdot"></div>
+      <span class="stxt" id="stxt">Готово к генерации</span>
+    </div>
+
+    <div class="pout" id="pout">Нажмите ⚡ Сгенерировать для создания промпта...</div>
+
+    <div class="modal-acts">
+      <button class="btn-copy" onclick="copyOut()">📋 Копировать</button>
+      <button class="btn-gen" id="genBtn" onclick="generate()">⚡ Сгенерировать</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── BLOCK CONFIG ───────────────────────────────────────────
+const BLOCKS = [
+  {id:'about',   n:1, em:'🌐', name:'О сайте',       acc:'#685BC7',
+   q:'Расскажи, о чём будет твой сайт и для кого он?',
+   ph:'Например: Мой сайт-портфолио для показа работ по дизайну. Для работодателей и клиентов.',
+   hint:'Опиши основную идею и цель сайта', wf:'wfs-hero'},
+
+  {id:'header',  n:2, em:'🔝', name:'Шапка',         acc:'#3b82f6',
+   q:'Что будет в шапке сайта?',
+   ph:'Например: Логотип с моим именем, меню: Главная, Портфолио, Обо мне, Контакты',
+   hint:'Логотип, название, пункты меню', wf:'wfs-header'},
+
+  {id:'hero',    n:3, em:'🎯', name:'Главный экран', acc:'#f59e0b',
+   q:'Что увидит посетитель первым делом?',
+   ph:'Например: Большой заголовок "Я создаю красивые сайты", подзаголовок и кнопка "Смотреть работы"',
+   hint:'Заголовок, подзаголовок, кнопка призыва к действию', wf:'wfs-hero'},
+
+  {id:'about_me',n:4, em:'👤', name:'Обо мне',       acc:'#22c55e',
+   q:'Что рассказать о себе?',
+   ph:'Например: Меня зовут Иван, мне 16 лет. Я учусь на разработчика и люблю создавать сайты.',
+   hint:'Фото, имя, возраст, увлечения', wf:'wfs-about'},
+
+  {id:'skills',  n:5, em:'⚡', name:'Навыки',        acc:'#ec4899',
+   q:'Какие навыки и умения ты хочешь показать?',
+   ph:'Например: HTML, CSS, JavaScript, Figma, Photoshop, Python',
+   hint:'Перечисли навыки через запятую', wf:'wfs-skills'},
+
+  {id:'works',   n:6, em:'🗂️', name:'Работы',        acc:'#ef4444',
+   q:'Какие проекты или работы хочешь показать?',
+   ph:'Например: Интернет-магазин одежды, личный блог, мобильное приложение для заметок',
+   hint:'Название и краткое описание каждой работы', wf:'wfs-works'},
+
+  {id:'style',   n:7, em:'🎨', name:'Стиль',         acc:'#a855f7',
+   q:'Как должен выглядеть твой сайт?',
+   ph:'Например: Тёмный фон, фиолетовые акценты, минималистичный стиль, современный дизайн',
+   hint:'Цвета, шрифты, общее настроение', wf:'wfs-style'},
+
+  {id:'contacts',n:8, em:'📬', name:'Контакты',      acc:'#06b6d4',
+   q:'Как с тобой можно связаться?',
+   ph:'Например: Email, Telegram @username, ВКонтакте, GitHub',
+   hint:'Email, соцсети, мессенджеры', wf:'wfs-contacts'},
+];
+
+// ─── STATE ──────────────────────────────────────────────────
+const S = {vals:{}, lang:'ru', pRu:'', pEn:'', busy:false};
+
+// ─── BOOT ────────────────────────────────────────────────────
+(function init(){
+  // theme
+  const t = localStorage.getItem('aitrend_theme') || 'dark';
+  applyTheme(t);
+  // api key
+  const k = localStorage.getItem('oai_key') || '';
+  const apiIn = document.getElementById('apiIn');
+  apiIn.value = k;
+  apiIn.addEventListener('input', e => localStorage.setItem('oai_key', e.target.value));
+  // render
+  renderCards();
+  initDivider();
+  updateProgress();
+})();
+
+// ─── RENDER CARDS ────────────────────────────────────────────
+function renderCards(){
+  const col = document.getElementById('colL');
+  BLOCKS.forEach(b => {
+    const d = document.createElement('div');
+    d.className = 'card';
+    d.id = 'card-'+b.id;
+    d.style.setProperty('--acc', b.acc);
+    d.innerHTML = `
+      <div class="card-top">
+        <div class="card-num">${b.n}</div>
+        <span class="card-em">${b.em}</span>
+        <span class="card-nm">${b.name}</span>
+        <div class="card-chk" id="chk-${b.id}"></div>
+      </div>
+      <div class="card-q">${b.q}</div>
+      <textarea class="card-ta" id="ta-${b.id}" placeholder="${b.ph}"></textarea>
+      <div class="card-hint">💡 ${b.hint}</div>`;
+    col.appendChild(d);
+
+    const ta = d.querySelector('textarea');
+    ta.addEventListener('input',  () => onInput(b));
+    ta.addEventListener('focus',  () => onFocus(b));
+    ta.addEventListener('blur',   () => onBlur(b));
+  });
+}
+
+// ─── TEXTAREA EVENTS ─────────────────────────────────────────
+function onInput(b){
+  const v = document.getElementById('ta-'+b.id).value.trim();
+  S.vals[b.id] = v;
+  const chk = document.getElementById('chk-'+b.id);
+  if(v.length > 3){ chk.classList.add('ok'); chk.textContent='✓'; }
+  else { chk.classList.remove('ok'); chk.textContent=''; }
+  updateProgress();
+  updateWF(b, v);
+}
+
+function onFocus(b){
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('foc'));
+  document.querySelectorAll('.wfs').forEach(s => s.classList.remove('act'));
+  document.getElementById('card-'+b.id).classList.add('foc');
+  const el = document.getElementById(b.wf);
+  if(el) el.classList.add('act');
+}
+
+function onBlur(b){
+  document.getElementById('card-'+b.id).classList.remove('foc');
+  const el = document.getElementById(b.wf);
+  if(el) el.classList.remove('act');
+}
+
+// ─── PROGRESS ────────────────────────────────────────────────
+function updateProgress(){
+  const n = BLOCKS.filter(b => (S.vals[b.id]||'').length > 3).length;
+  document.getElementById('pcnt').textContent = n + ' / 8 блоков';
+  document.querySelectorAll('.pill').forEach((p,i) => {
+    const filled = BLOCKS[i] && (S.vals[BLOCKS[i].id]||'').length > 3;
+    p.classList.toggle('on', filled);
+  });
+}
+
+// ─── WIREFRAME UPDATES ───────────────────────────────────────
+const COLOR_MAP = {
+  'красн':'#ef4444','синий':'#3b82f6','зелен':'#22c55e','фиолет':'#8b5cf6',
+  'жёлт':'#f59e0b','чёрн':'#111111','бел':'#f8f8f8','сер':'#6b7280',
+  'оранж':'#f97316','розов':'#ec4899','голуб':'#06b6d4','беж':'#d4a373'
+};
+
+function updateWF(b, v){
+  const el = document.getElementById('wfs-'+b.wf.replace('wfs-',''));
+  const filled = v.length > 3;
+
+  switch(b.id){
+    case 'header':{
+      // nav items
+      const items = v.split(/[,;|\/]/).map(s=>s.replace(/[•\-–]/g,'').trim()).filter(s=>s.length>1&&s.length<24);
+      if(items.length>1){
+        document.getElementById('wfNav').innerHTML = items.slice(0,5).map(it=>
+          `<div class="wfr-ni" style="width:${Math.min(it.length*5,58)}px;opacity:.75" title="${it}"></div>`
+        ).join('');
+      }
+      document.getElementById('wfs-header').classList.toggle('fill', filled);
+      break;
+    }
+    case 'hero':{
+      const tMatch = v.match(/["«»]([^"«»\n]{4,40})["«»]/) || v.match(/заголовок[:\s]+([^\n,]{4,40})/i) || v.match(/^([^,\n]{6,42})/);
+      if(tMatch) document.getElementById('wfHT').style.width = Math.min(tMatch[1].length*4.5,85)+'%';
+      const bMatch = v.match(/кнопк[аи][:\s«"]+([^"»\n,]{2,28})/i);
+      if(bMatch) document.getElementById('wfHB').title = bMatch[1].trim();
+      document.getElementById('wfs-hero').classList.toggle('fill', filled);
+      break;
+    }
+    case 'about':{
+      // Update URL bar with site name hint
+      const nm = v.match(/портфолио|portfolio|блог|blog|студия|studio/i);
+      if(nm) document.getElementById('urlT').textContent = nm[0].toLowerCase()+'.ru';
+      document.getElementById('wfs-hero').classList.toggle('fill', filled);
+      break;
+    }
+    case 'about_me':{
+      document.getElementById('wfs-about').classList.toggle('fill', filled);
+      break;
+    }
+    case 'skills':{
+      const sk = v.split(/[,;]/).map(s=>s.trim()).filter(s=>s.length>0&&s.length<22);
+      if(sk.length>0){
+        document.getElementById('wfSkills').innerHTML = sk.slice(0,9).map(s=>
+          `<div class="wfr-sk">${s}</div>`).join('');
+      }
+      document.getElementById('wfs-skills').classList.toggle('fill', filled);
+      break;
+    }
+    case 'works':{
+      const pr = v.split(/[,;\n]/).map(s=>s.replace(/^\d+[.)]\s*/,'').trim()).filter(s=>s.length>2);
+      if(pr.length>0){
+        const cont = document.getElementById('wfWorks');
+        cont.innerHTML = pr.slice(0,4).map(p=>
+          `<div class="wfr-wc"><div class="wfr-wct">${p}</div></div>`).join('');
+        while(cont.children.length<4) cont.innerHTML += '<div class="wfr-wc"></div>';
+      }
+      document.getElementById('wfs-works').classList.toggle('fill', filled);
+      break;
+    }
+    case 'style':{
+      const hexes = [...v.matchAll(/#[0-9a-fA-F]{3,6}/g)].map(m=>m[0]);
+      const named = Object.entries(COLOR_MAP).filter(([k])=>v.toLowerCase().includes(k)).map(([,c])=>c);
+      const cols  = [...hexes, ...named];
+      if(cols[0]) document.getElementById('wfC1').style.background = cols[0];
+      if(cols[1]) document.getElementById('wfC2').style.background = cols[1];
+      if(cols[2]) document.getElementById('wfC3').style.background = cols[2];
+
+      const keywords = ['минимализм','минималист','современный','яркий','тёмный','светлый',
+                        'градиент','анимация','glassmorphism','неон','brutalism','ретро'];
+      const found = keywords.filter(w=>v.toLowerCase().includes(w));
+      if(found.length>0){
+        document.getElementById('wfSTags').innerHTML = found.map(w=>
+          `<div class="wfr-stag">${w}</div>`).join('');
+      }
+      document.getElementById('wfs-style').classList.toggle('fill', filled);
+      break;
+    }
+    case 'contacts':{
+      const MAP = {
+        'email':'✉️','почта':'✉️','gmail':'✉️','mail':'✉️',
+        'telegram':'✈️','телеграм':'✈️','tg':'✈️',
+        'вконтакте':'💙','вк':'💙','vk':'💙',
+        'github':'🐱','гитхаб':'🐱',
+        'instagram':'📸','инста':'📸','ig':'📸',
+        'youtube':'📺','ютуб':'📺',
+        'tiktok':'🎵','тикток':'🎵',
+        'whatsapp':'💬','вотсап':'💬',
+        'телефон':'📞','phone':'📞','номер':'📞',
+        'linkedin':'💼','behance':'🎨','dribbble':'🎯',
+      };
+      const vl = v.toLowerCase();
+      const icons = [...new Set(Object.entries(MAP).filter(([k])=>vl.includes(k)).map(([,i])=>i))];
+      if(icons.length>0){
+        document.getElementById('wfCont').innerHTML = icons.map(i=>
+          `<div class="wfr-ci">${i}</div>`).join('');
+      }
+      document.getElementById('wfs-contacts').classList.toggle('fill', filled);
+      break;
+    }
+  }
+}
+
+// ─── DIVIDER ─────────────────────────────────────────────────
+function initDivider(){
+  const div = document.getElementById('divider');
+  const main = document.getElementById('main');
+  let dragging = false;
+
+  div.addEventListener('pointerdown', e=>{
+    if(e.target.classList.contains('snap-btn')) return;
+    dragging = true;
+    div.classList.add('drag');
+    div.setPointerCapture(e.pointerId);
+  });
+  div.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const r = main.getBoundingClientRect();
+    const pct = ((e.clientX - r.left) / r.width) * 100;
+    setSplit(Math.max(18, Math.min(82, pct)), false);
+  });
+  div.addEventListener('pointerup', ()=>{ dragging=false; div.classList.remove('drag'); });
+  div.addEventListener('dblclick', ()=> snap(50));
+}
+
+function setSplit(pct, anim=true){
+  const colL = document.getElementById('colL');
+  if(anim){
+    colL.style.transition = 'width 300ms cubic-bezier(.4,0,.2,1)';
+    setTimeout(()=>{ colL.style.transition=''; }, 320);
+  }
+  colL.style.width = pct+'%';
+}
+function snap(pct){ setSplit(pct); }
+
+// ─── THEME ───────────────────────────────────────────────────
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme');
+  applyTheme(cur==='dark' ? 'light' : 'dark');
+}
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('aitrend_theme', t);
+  document.getElementById('togBall').textContent = t==='dark' ? '🌙' : '☀️';
+}
+
+// ─── MODAL ───────────────────────────────────────────────────
+function openModal(){
+  document.getElementById('ov').classList.add('open');
+  if(!S.pRu) buildStaticPrompt();
+}
+function closeModal(){ document.getElementById('ov').classList.remove('open'); }
+function ovClick(e){ if(e.target===document.getElementById('ov')) closeModal(); }
+
+function setLang(l){
+  S.lang = l;
+  document.getElementById('tabRu').classList.toggle('on', l==='ru');
+  document.getElementById('tabEn').classList.toggle('on', l==='en');
+  const out = document.getElementById('pout');
+  if(l==='ru') out.textContent = S.pRu || 'Нажмите ⚡ Сгенерировать...';
+  else          out.textContent = S.pEn || 'Click ⚡ Generate...';
+}
+
+function buildStaticPrompt(){
+  const v = S.vals;
+  const lines = (id, label) => `━━━ ${label} ━━━\n${v[id]||'(не заполнено)'}`;
+  S.pRu = [
+    lines('about','О САЙТЕ'), lines('header','ШАПКА'), lines('hero','ГЛАВНЫЙ ЭКРАН'),
+    lines('about_me','ОБО МНЕ'), lines('skills','НАВЫКИ'), lines('works','РАБОТЫ'),
+    lines('style','СТИЛЬ'), lines('contacts','КОНТАКТЫ')
+  ].join('\n\n');
+  document.getElementById('pout').textContent = S.pRu;
+}
+
+function setStatus(type, text){
+  const d = document.getElementById('sdot');
+  d.className = 'sdot' + (type ? ' '+type : '');
+  document.getElementById('stxt').textContent = text;
+}
+
+// ─── GENERATE ────────────────────────────────────────────────
+async function generate(){
+  const key = document.getElementById('apiIn').value.trim();
+  if(!key){ setStatus('err','Введите API ключ OpenAI'); return; }
+  if(S.busy) return;
+  S.busy = true;
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true; btn.textContent = '⏳ Генерация...';
+  setStatus('loading', 'Генерация промпта...');
+
+  const out = document.getElementById('pout');
+  out.textContent = '';
+
+  const content = buildUserContent();
+
+  const SYS_RU = `Ты — опытный веб-разработчик и промпт-инженер. На основе описания пользователя создай детальный, профессиональный промпт для ИИ-разработчика сайта. Используй разделители ━━━ РАЗДЕЛ ━━━. В конце добавь блок ━━━ ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ ━━━. Пиши только на русском языке.`;
+  const SYS_EN = `You are an expert web developer and prompt engineer. Based on the user description, create a detailed, professional prompt for an AI site developer. Use ━━━ SECTION ━━━ separators. Add a ━━━ TECHNICAL REQUIREMENTS ━━━ block at the end. Write in English only.`;
+
+  try {
+    if(S.lang==='ru'){
+      const text = await streamChat(key, SYS_RU, content, out);
+      S.pRu = text;
+      setStatus('loading','Генерация на английском...');
+      bgChat(key, SYS_EN, content).then(t=>{ S.pEn=t; });
+    } else {
+      const text = await streamChat(key, SYS_EN, content+'(Respond in English)', out);
+      S.pEn = text;
+      setStatus('loading','Генерация на русском...');
+      bgChat(key, SYS_RU, content).then(t=>{ S.pRu=t; });
+    }
+    setStatus('ready','Промпт готов!');
+  } catch(e){
+    setStatus('err','Ошибка: '+e.message);
+    out.textContent = 'Ошибка. Проверьте API ключ и повторите.';
+  }
+
+  S.busy = false;
+  btn.disabled = false; btn.textContent = '⚡ Сгенерировать';
+}
+
+function buildUserContent(){
+  const v = S.vals;
+  const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'не указано'}`;
+  return 'Создай промпт для разработки сайта по описанию ниже:\n\n'+[
+    sec('about','О САЙТЕ'), sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
+    sec('about_me','ОБО МНЕ'), sec('skills','НАВЫКИ'), sec('works','РАБОТЫ'),
+    sec('style','СТИЛЬ'), sec('contacts','КОНТАКТЫ')
+  ].join('\n\n');
+}
+
+async function streamChat(key, sys, user, outEl){
+  const res = await fetch('https://api.openai.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'gpt-4o-mini', stream:true, temperature:.7, max_tokens:2000,
+      messages:[{role:'system',content:sys},{role:'user',content:user}]
+    })
+  });
+  if(!res.ok){
+    const j = await res.json().catch(()=>({}));
+    throw new Error(j.error?.message || 'HTTP '+res.status);
+  }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let full = '';
+  while(true){
+    const {done, value} = await reader.read();
+    if(done) break;
+    const chunk = dec.decode(value,{stream:true});
+    for(const line of chunk.split('\n')){
+      if(!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if(data==='[DONE]') continue;
+      try{
+        const delta = JSON.parse(data).choices?.[0]?.delta?.content||'';
+        if(delta){ full+=delta; outEl.textContent=full; outEl.scrollTop=outEl.scrollHeight; }
+      }catch{}
+    }
+  }
+  return full;
+}
+
+async function bgChat(key, sys, user){
+  try{
+    const res = await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'gpt-4o-mini', stream:false, temperature:.7, max_tokens:2000,
+        messages:[{role:'system',content:sys},{role:'user',content:user}]
+      })
+    });
+    if(!res.ok) return '';
+    return (await res.json()).choices?.[0]?.message?.content||'';
+  }catch{ return ''; }
+}
+
+function copyOut(){
+  const text = document.getElementById('pout').textContent;
+  if(!text || text.includes('Нажмите') || text.includes('Click')) return;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.querySelector('.btn-copy');
+    const orig = btn.textContent;
+    btn.textContent = '✅ Скопировано!';
+    setTimeout(()=>{ btn.textContent=orig; }, 2000);
+  }).catch(()=>{
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+</script>
+</body>
+</html>
