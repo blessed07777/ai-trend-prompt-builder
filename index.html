@@ -22,9 +22,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 /* ── HEADER ── */
 .hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;z-index:100;transition:background .3s}
 .logo{display:flex;align-items:center;gap:8px;flex-shrink:0;text-decoration:none}
-.logo-sq{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#685BC7,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;letter-spacing:-.5px}
-.logo-txt{font-size:14px;font-weight:500;color:var(--text)}
-.logo-txt b{color:#8b5cf6;font-weight:800}
+.logo-txt{font-size:15px;font-weight:700;color:#685BC7;letter-spacing:-.3px}
+.logo-txt b{color:#685BC7;font-weight:800}
 .hdr-mid{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
 .pills{display:flex;gap:4px}
 .pill{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .25s}
@@ -156,8 +155,20 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <!-- HEADER -->
 <header class="hdr">
   <div class="logo">
-    <div class="logo-sq">AI</div>
-    <span class="logo-txt">AI <b>TREND</b></span>
+    <!-- aitrend logomark: white 'a' C-shape + lime 'i' + dot on purple bg -->
+    <svg width="34" height="34" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+      <rect width="100" height="100" rx="19" fill="#685BC7"/>
+      <!-- White 'a': thick C arc -->
+      <path d="M 65,38 A 23,23 0 1,0 65,74"
+            fill="none" stroke="white" stroke-width="16" stroke-linecap="butt"/>
+      <!-- White bottom shelf (foot of the 'a') -->
+      <rect x="56" y="66" width="23" height="14" fill="white"/>
+      <!-- Lime green 'i' stem -->
+      <rect x="57" y="37" width="18" height="28" fill="#AADF00" rx="1"/>
+      <!-- Lime green dot -->
+      <circle cx="66" cy="22" r="10" fill="#AADF00"/>
+    </svg>
+    <span class="logo-txt">ai<b>trend</b></span>
   </div>
 
   <div class="hdr-mid">
