@@ -337,10 +337,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <button class="sh-close" onclick="closeModal()">✕</button>
     </div>
 
-    <div>
-      <div class="api-lbl">🔑 OpenAI API ключ</div>
-      <input class="api-in" type="password" id="apiIn" placeholder="sk-..." autocomplete="off">
-    </div>
+    <input type="hidden" id="apiIn">
 
     <div class="lang-tabs">
       <button class="ltab on" id="tabRu" onclick="setLang('ru')">🇷🇺 Русский</button>
@@ -414,12 +411,8 @@ const S = {vals:{}, lang:'ru', pRu:'', pEn:'', busy:false};
   const t = localStorage.getItem('aitrend_theme') || 'dark';
   applyTheme(t);
   // api key
-  const DEFAULT_KEY = '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';
-  const k = localStorage.getItem('oai_key') || DEFAULT_KEY;
-  const apiIn = document.getElementById('apiIn');
-  apiIn.value = k;
-  if (!localStorage.getItem('oai_key')) localStorage.setItem('oai_key', DEFAULT_KEY);
-  apiIn.addEventListener('input', e => localStorage.setItem('oai_key', e.target.value));
+  const DEFAULT_KEY = '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';
+  localStorage.setItem('oai_key', DEFAULT_KEY);
   // render
   renderNav();
   renderCards();
