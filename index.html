@@ -414,9 +414,11 @@ const S = {vals:{}, lang:'ru', pRu:'', pEn:'', busy:false};
   const t = localStorage.getItem('aitrend_theme') || 'dark';
   applyTheme(t);
   // api key
-  const k = localStorage.getItem('oai_key') || '';
+  const DEFAULT_KEY = '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';
+  const k = localStorage.getItem('oai_key') || DEFAULT_KEY;
   const apiIn = document.getElementById('apiIn');
   apiIn.value = k;
+  if (!localStorage.getItem('oai_key')) localStorage.setItem('oai_key', DEFAULT_KEY);
   apiIn.addEventListener('input', e => localStorage.setItem('oai_key', e.target.value));
   // render
   renderNav();
