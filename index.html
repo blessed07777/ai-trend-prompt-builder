@@ -152,6 +152,64 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .wfr-contacts{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
 .wfr-ci{width:26px;height:26px;border-radius:50%;background:var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px}
 
+/* ── MOBILE ── */
+@media(max-width:768px){
+  :root{--hh:52px}
+  .hdr{padding:0 12px;gap:8px}
+  .logo-txt{font-size:14px}
+  .hdr-mid{display:none}
+  .btn-main{display:none}
+
+  .main{flex-direction:row;height:calc(100vh - var(--hh) - 62px)}
+  .col-l{width:100%!important;flex-shrink:1;padding:10px}
+  .col-r{display:none!important}
+  .col-r.mob-show{display:flex!important;width:100%;flex:1}
+  .col-l.mob-hide{display:none!important}
+  .div{display:none!important}
+
+  .card{padding:12px}
+  .card-q{font-size:14px}
+  .card-ta{min-height:110px;font-size:15px;padding:10px 12px}
+  .card-hint{font-size:12px}
+}
+
+/* bottom tab bar — hidden on desktop */
+.mob-bar{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;height:62px;
+  background:var(--surface);border-top:1px solid var(--border);
+  z-index:100;align-items:center;padding:0 12px;gap:8px;
+  transition:background .3s;
+}
+.mob-tab{
+  flex:1;height:46px;border-radius:12px;border:none;
+  background:transparent;color:var(--text3);
+  font-size:13px;font-weight:600;cursor:pointer;
+  font-family:inherit;display:flex;align-items:center;
+  justify-content:center;gap:5px;transition:all .2s;
+}
+.mob-tab.on{background:var(--surface2);color:var(--text)}
+.mob-tab-icon{font-size:17px;line-height:1}
+.mob-btn-prompt{
+  height:46px;padding:0 18px;border-radius:12px;
+  background:linear-gradient(135deg,#685BC7,#8b5cf6);
+  border:none;color:#fff;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+  box-shadow:0 2px 12px rgba(104,91,199,.45);
+  flex-shrink:0;
+}
+@media(max-width:768px){.mob-bar{display:flex}}
+
+/* progress counter mobile pill */
+.pcnt-mob{
+  display:none;
+  font-size:11px;font-weight:700;
+  color:var(--text2);
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:20px;padding:3px 10px;white-space:nowrap;
+}
+@media(max-width:768px){.pcnt-mob{display:block}.pcnt{display:none!important}}
+
 /* ── MODAL ── */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(5px)}
 .ov.open{opacity:1;pointer-events:all}
@@ -209,6 +267,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
 
   <div class="hdr-r">
+    <span class="pcnt-mob" id="pcntMob">0 / 5</span>
     <button class="tog" id="tog" onclick="toggleTheme()">
       <div class="tog-ball" id="togBall">🌙</div>
     </button>
@@ -216,6 +275,17 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
 
 </header>
+
+<!-- MOBILE BOTTOM TAB BAR -->
+<div class="mob-bar" id="mobBar">
+  <button class="mob-tab on" id="mobTabB" onclick="mobSwitch('builder')">
+    <span class="mob-tab-icon">📝</span>Конструктор
+  </button>
+  <button class="mob-tab" id="mobTabP" onclick="mobSwitch('preview')">
+    <span class="mob-tab-icon">👁</span>Превью
+  </button>
+  <button class="mob-btn-prompt" onclick="openModal()">✨ Промпт</button>
+</div>
 
 <!-- MAIN -->
 <div class="main" id="main">
@@ -363,42 +433,27 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 const BLOCKS = [
   {id:'header',  n:1, em:'🔝', name:'Шапка',         acc:'#3b82f6',
    q:'Что будет в шапке сайта?',
-   ph:'Например: Логотип с моим именем, меню: Главная, Портфолио, Обо мне, Контакты',
-   hint:'Логотип, название, пункты меню навигации', wf:'wfs-header'},
+   ph:'Например: Логотип с именем, меню: Главная, Портфолио, Обо мне, Контакты',
+   hint:'Логотип, название, пункты навигации', wf:'wfs-header'},
 
-  {id:'about',   n:2, em:'🌐', name:'О сайте',       acc:'#685BC7',
-   q:'Расскажи, о чём будет твой сайт и для кого он?',
-   ph:'Например: Мой сайт-портфолио для показа работ по дизайну. Для работодателей и клиентов.',
-   hint:'Опиши основную идею и цель сайта', wf:'wfs-hero'},
-
-  {id:'hero',    n:3, em:'🎯', name:'Главный экран', acc:'#f59e0b',
+  {id:'hero',    n:2, em:'🎯', name:'Главный экран', acc:'#f59e0b',
    q:'Что увидит посетитель первым делом?',
    ph:'Например: Большой заголовок "Я создаю красивые сайты", подзаголовок и кнопка "Смотреть работы"',
    hint:'Заголовок, подзаголовок, кнопка призыва к действию', wf:'wfs-hero'},
 
-  {id:'about_me',n:4, em:'👤', name:'Обо мне',       acc:'#22c55e',
+  {id:'about_me',n:3, em:'👤', name:'Обо мне',       acc:'#22c55e',
    q:'Что рассказать о себе?',
-   ph:'Например: Меня зовут Иван, мне 16 лет. Я учусь на разработчика и люблю создавать сайты.',
+   ph:'Например: Меня зовут Иван, мне 16 лет. Учусь на разработчика, люблю создавать сайты.',
    hint:'Фото, имя, возраст, увлечения', wf:'wfs-about'},
 
-  {id:'skills',  n:5, em:'⚡', name:'Навыки',        acc:'#ec4899',
-   q:'Какие навыки и умения ты хочешь показать?',
-   ph:'Например: HTML, CSS, JavaScript, Figma, Photoshop, Python',
-   hint:'Перечисли навыки через запятую', wf:'wfs-skills'},
-
-  {id:'works',   n:6, em:'🗂️', name:'Работы',        acc:'#ef4444',
+  {id:'works',   n:4, em:'🗂️', name:'Работы',        acc:'#ef4444',
    q:'Какие проекты или работы хочешь показать?',
    ph:'Например: Интернет-магазин одежды, личный блог, мобильное приложение для заметок',
    hint:'Название и краткое описание каждой работы', wf:'wfs-works'},
 
-  {id:'style',   n:7, em:'🎨', name:'Стиль',         acc:'#a855f7',
-   q:'Как должен выглядеть твой сайт?',
-   ph:'Например: Тёмный фон, фиолетовые акценты, минималистичный стиль, современный дизайн',
-   hint:'Цвета, шрифты, общее настроение', wf:'wfs-style'},
-
-  {id:'contacts',n:8, em:'📬', name:'Контакты',      acc:'#06b6d4',
+  {id:'contacts',n:5, em:'📬', name:'Контакты',      acc:'#06b6d4',
    q:'Как с тобой можно связаться?',
-   ph:'Например: Email, Telegram @username, ВКонтакте, GitHub',
+   ph:'Например: Email hello@mail.ru, Telegram @username, GitHub, ВКонтакте',
    hint:'Email, соцсети, мессенджеры', wf:'wfs-contacts'},
 ];
 
@@ -488,14 +543,33 @@ function onBlur(b){
 // ─── PROGRESS ────────────────────────────────────────────────
 function updateProgress(){
   const n = BLOCKS.filter(b => (S.vals[b.id]||'').length > 3).length;
-  document.getElementById('pcnt').textContent = n + ' / 8 блоков';
+  const total = BLOCKS.length;
+  document.getElementById('pcnt').textContent = n + ' / ' + total + ' блоков';
+  document.getElementById('pcntMob').textContent = n + ' / ' + total;
   BLOCKS.forEach(b => {
     const filled = (S.vals[b.id]||'').length > 3;
     const pill = document.getElementById('pill-'+b.id);
     if(pill) pill.style.background = filled ? b.acc : 'rgba(255,255,255,0.13)';
     if(pill) pill.classList.toggle('on', filled);
   });
-  document.getElementById('hdr').style.setProperty('--prog', (n/8*100)+'%');
+  document.getElementById('hdr').style.setProperty('--prog', (n/total*100)+'%');
+}
+
+// ─── MOBILE TABS ─────────────────────────────────────────────
+function mobSwitch(tab){
+  const L = document.getElementById('colL');
+  const R = document.getElementById('colR');
+  const bBtn = document.getElementById('mobTabB');
+  const pBtn = document.getElementById('mobTabP');
+  if(tab === 'builder'){
+    L.classList.remove('mob-hide');
+    R.classList.remove('mob-show');
+    bBtn.classList.add('on'); pBtn.classList.remove('on');
+  } else {
+    L.classList.add('mob-hide');
+    R.classList.add('mob-show');
+    bBtn.classList.remove('on'); pBtn.classList.add('on');
+  }
 }
 
 // ─── WIREFRAME UPDATES ───────────────────────────────────────
@@ -665,11 +739,10 @@ function setLang(l){
 
 function buildStaticPrompt(){
   const v = S.vals;
-  const lines = (id, label) => `━━━ ${label} ━━━\n${v[id]||'(не заполнено)'}`;
+  const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'(не заполнено)'}`;
   S.pRu = [
-    lines('about','О САЙТЕ'), lines('header','ШАПКА'), lines('hero','ГЛАВНЫЙ ЭКРАН'),
-    lines('about_me','ОБО МНЕ'), lines('skills','НАВЫКИ'), lines('works','РАБОТЫ'),
-    lines('style','СТИЛЬ'), lines('contacts','КОНТАКТЫ')
+    sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
+    sec('about_me','ОБО МНЕ'), sec('works','РАБОТЫ'), sec('contacts','КОНТАКТЫ')
   ].join('\n\n');
   document.getElementById('pout').textContent = S.pRu;
 }
@@ -725,9 +798,8 @@ function buildUserContent(){
   const v = S.vals;
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'не указано'}`;
   return 'Создай промпт для разработки сайта по описанию ниже:\n\n'+[
-    sec('about','О САЙТЕ'), sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
-    sec('about_me','ОБО МНЕ'), sec('skills','НАВЫКИ'), sec('works','РАБОТЫ'),
-    sec('style','СТИЛЬ'), sec('contacts','КОНТАКТЫ')
+    sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
+    sec('about_me','ОБО МНЕ'), sec('works','РАБОТЫ'), sec('contacts','КОНТАКТЫ')
   ].join('\n\n');
 }
 
