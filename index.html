@@ -446,17 +446,12 @@ const BLOCKS = [
    ph:'Например: Меня зовут Иван, мне 16 лет. Учусь на разработчика, люблю создавать сайты.',
    hint:'Фото, имя, возраст, увлечения', wf:'wfs-about'},
 
-  {id:'works',   n:4, em:'🗂️', name:'Работы',        acc:'#ef4444',
-   q:'Какие проекты или работы хочешь показать?',
-   ph:'Например: Интернет-магазин одежды, личный блог, мобильное приложение для заметок',
-   hint:'Название и краткое описание каждой работы', wf:'wfs-works'},
-
-  {id:'contacts',  n:5, em:'📬', name:'Контакты',         acc:'#06b6d4',
+  {id:'contacts',  n:4, em:'📬', name:'Контакты',         acc:'#06b6d4',
    q:'Как с тобой можно связаться?',
    ph:'Например: Email hello@mail.ru, Telegram @username, GitHub, ВКонтакте',
    hint:'Email, соцсети, мессенджеры', wf:'wfs-contacts'},
 
-  {id:'style_anim',n:6, em:'✨', name:'Стиль & Анимации', acc:'#a855f7',
+  {id:'style_anim',n:5, em:'✨', name:'Стиль & Анимации', acc:'#a855f7',
    q:'Как должен выглядеть сайт и какие анимации ты хочешь?',
    ph:'Например: тёмный фон, фиолетовые акценты #8b5cf6, плавный fade-in при скролле, hover-эффекты на кнопках, glassmorphism-карточки, частицы на фоне',
    hint:'Цвета, шрифт, анимации появления, hover-эффекты, общее настроение',
@@ -763,7 +758,7 @@ function buildStaticPrompt(){
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'(не заполнено)'}`;
   S.pRu = [
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
-    sec('about_me','ОБО МНЕ'), sec('works','РАБОТЫ'),
+    sec('about_me','ОБО МНЕ'),
     sec('contacts','КОНТАКТЫ'), sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
   document.getElementById('pout').textContent = S.pRu;
@@ -844,7 +839,7 @@ function buildUserContent(){
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'не указано'}`;
   return 'Создай промпт для разработки сайта по описанию ниже:\n\n'+[
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
-    sec('about_me','ОБО МНЕ'), sec('works','РАБОТЫ'),
+    sec('about_me','ОБО МНЕ'),
     sec('contacts','КОНТАКТЫ'), sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
 }
