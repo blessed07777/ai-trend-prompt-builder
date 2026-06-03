@@ -451,10 +451,16 @@ const BLOCKS = [
    ph:'Например: Интернет-магазин одежды, личный блог, мобильное приложение для заметок',
    hint:'Название и краткое описание каждой работы', wf:'wfs-works'},
 
-  {id:'contacts',n:5, em:'📬', name:'Контакты',      acc:'#06b6d4',
+  {id:'contacts',  n:5, em:'📬', name:'Контакты',         acc:'#06b6d4',
    q:'Как с тобой можно связаться?',
    ph:'Например: Email hello@mail.ru, Telegram @username, GitHub, ВКонтакте',
    hint:'Email, соцсети, мессенджеры', wf:'wfs-contacts'},
+
+  {id:'style_anim',n:6, em:'✨', name:'Стиль & Анимации', acc:'#a855f7',
+   q:'Как должен выглядеть сайт и какие анимации ты хочешь?',
+   ph:'Например: тёмный фон, фиолетовые акценты #8b5cf6, плавный fade-in при скролле, hover-эффекты на кнопках, glassmorphism-карточки, частицы на фоне',
+   hint:'Цвета, шрифт, анимации появления, hover-эффекты, общее настроение',
+   wf:'wfs-style'},
 ];
 
 // ─── STATE ──────────────────────────────────────────────────
@@ -652,6 +658,21 @@ function updateWF(b, v){
       document.getElementById('wfs-style').classList.toggle('fill', filled);
       break;
     }
+    case 'style_anim':{
+      const hexes = [...v.matchAll(/#[0-9a-fA-F]{3,6}/g)].map(m=>m[0]);
+      const named = Object.entries(COLOR_MAP).filter(([k])=>v.toLowerCase().includes(k)).map(([,c])=>c);
+      const cols = [...hexes,...named];
+      if(cols[0]) document.getElementById('wfC1').style.background=cols[0];
+      if(cols[1]) document.getElementById('wfC2').style.background=cols[1];
+      if(cols[2]) document.getElementById('wfC3').style.background=cols[2];
+      const animKw=['fade','parallax','scroll','hover','glassmorphism','неон','neon','частиц',
+                    'gradient','градиент','анимац','particle','glow','blur','минимализм',
+                    'тёмный','светлый','яркий','ретро','brutalism','3d'];
+      const found=animKw.filter(w=>v.toLowerCase().includes(w));
+      if(found.length>0) document.getElementById('wfSTags').innerHTML=found.map(w=>`<div class="wfr-stag">${w}</div>`).join('');
+      document.getElementById('wfs-style').classList.toggle('fill',filled);
+      break;
+    }
     case 'contacts':{
       const MAP = {
         'email':'✉️','почта':'✉️','gmail':'✉️','mail':'✉️',
@@ -742,7 +763,8 @@ function buildStaticPrompt(){
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'(не заполнено)'}`;
   S.pRu = [
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
-    sec('about_me','ОБО МНЕ'), sec('works','РАБОТЫ'), sec('contacts','КОНТАКТЫ')
+    sec('about_me','ОБО МНЕ'), sec('works','РАБОТЫ'),
+    sec('contacts','КОНТАКТЫ'), sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
   document.getElementById('pout').textContent = S.pRu;
 }
@@ -769,8 +791,31 @@ async function generate(){
 
   const content = buildUserContent();
 
-  const SYS_RU = `Ты — опытный веб-разработчик и промпт-инженер. На основе описания пользователя создай детальный, профессиональный промпт для ИИ-разработчика сайта. Используй разделители ━━━ РАЗДЕЛ ━━━. В конце добавь блок ━━━ ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ ━━━. Пиши только на русском языке.`;
-  const SYS_EN = `You are an expert web developer and prompt engineer. Based on the user description, create a detailed, professional prompt for an AI site developer. Use ━━━ SECTION ━━━ separators. Add a ━━━ TECHNICAL REQUIREMENTS ━━━ block at the end. Write in English only.`;
+  const SYS_RU = `Ты — опытный веб-разработчик, дизайнер и промпт-инженер. На основе описания пользователя создай детальный, профессиональный промпт для ИИ-разработчика сайта.
+
+ВАЖНО — сайт должен быть визуально потрясающим:
+• Укажи конкретные CSS-анимации: fade-in при скролле (IntersectionObserver), плавные hover-эффекты, переходы
+• Пропиши красивую цветовую схему с градиентами, акцентами и тенями
+• Добавь современные эффекты: glassmorphism, parallax, particle.js или чистые CSS-частицы, glow-эффекты
+• Укажи типографику: красивые шрифты Google Fonts, размеры, межстрочный интервал
+• Hero-секция: полноэкранная с анимированным фоном (градиент, частицы или волны)
+• Micro-interactions: кнопки с ripple/scale, карточки с 3D-наклоном при hover
+• Smooth scroll, loading-анимация, stagger-эффекты для списков
+
+Используй разделители ━━━ РАЗДЕЛ ━━━. В конце добавь ━━━ ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ ━━━ с конкретными библиотеками (GSAP, AOS, Lottie и т.д.) если нужно. Пиши только на русском языке.`;
+
+  const SYS_EN = `You are an expert web developer, designer and prompt engineer. Based on the user's description, create a detailed, professional prompt for an AI site developer.
+
+IMPORTANT — the site must be visually stunning:
+• Specify CSS animations: fade-in on scroll (IntersectionObserver), smooth hover effects, transitions
+• Define a beautiful color scheme with gradients, accents and shadows
+• Add modern effects: glassmorphism, parallax, particle effects, glow
+• Specify typography: beautiful Google Fonts, sizes, line-height
+• Hero section: full-screen with animated background (gradient, particles or waves)
+• Micro-interactions: buttons with ripple/scale, cards with 3D-tilt on hover
+• Smooth scroll, loading animation, stagger effects for lists
+
+Use ━━━ SECTION ━━━ separators. End with ━━━ TECHNICAL REQUIREMENTS ━━━ listing specific libraries (GSAP, AOS, Lottie etc.) if needed. Write in English only.`;
 
   try {
     if(S.lang==='ru'){
@@ -799,7 +844,8 @@ function buildUserContent(){
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'не указано'}`;
   return 'Создай промпт для разработки сайта по описанию ниже:\n\n'+[
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
-    sec('about_me','ОБО МНЕ'), sec('works','РАБОТЫ'), sec('contacts','КОНТАКТЫ')
+    sec('about_me','ОБО МНЕ'), sec('works','РАБОТЫ'),
+    sec('contacts','КОНТАКТЫ'), sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
 }
 
