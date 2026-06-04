@@ -545,9 +545,7 @@ const S = {vals:{}, lang:'ru', pRu:'', pEn:'', busy:false};
   const t = localStorage.getItem('aitrend_theme') || 'dark';
   applyTheme(t);
   // api key
-  const DEFAULT_KEY = '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';
-  document.getElementById('apiIn').value = DEFAULT_KEY;
-  localStorage.setItem('oai_key', DEFAULT_KEY);
+  // API key is stored server-side in Vercel env vars — not in code
   // render
   renderNav();
   renderCards();
@@ -889,8 +887,6 @@ function setStatus(type, text){
 
 // ─── GENERATE ────────────────────────────────────────────────
 async function generate(){
-  const key = document.getElementById('apiIn').value.trim();
-  if(!key){ setStatus('err','Введите API ключ OpenAI'); return; }
   if(S.busy) return;
   S.busy = true;
 
@@ -931,20 +927,20 @@ Use ━━━ SECTION ━━━ separators. End with ━━━ TECHNICAL REQUIRE
 
   try {
     if(S.lang==='ru'){
-      const text = await streamChat(key, SYS_RU, content, out);
+      const text = await streamChat(SYS_RU, content, out);
       S.pRu = text;
       setStatus('loading','Генерация на английском...');
-      bgChat(key, SYS_EN, content).then(t=>{ S.pEn=t; });
+      bgChat(SYS_EN, content).then(t=>{ S.pEn=t; });
     } else {
-      const text = await streamChat(key, SYS_EN, content+'(Respond in English)', out);
+      const text = await streamChat(SYS_EN, content+'(Respond in English)', out);
       S.pEn = text;
       setStatus('loading','Генерация на русском...');
-      bgChat(key, SYS_RU, content).then(t=>{ S.pRu=t; });
+      bgChat(SYS_RU, content).then(t=>{ S.pRu=t; });
     }
     setStatus('ready','Промпт готов!');
   } catch(e){
     setStatus('err','Ошибка: '+e.message);
-    out.textContent = 'Ошибка. Проверьте API ключ и повторите.';
+    out.textContent = 'Ошибка при генерации. Попробуй ещё раз.';
   }
 
   S.busy = false;
@@ -961,10 +957,10 @@ function buildUserContent(){
   ].join('\n\n');
 }
 
-async function streamChat(key, sys, user, outEl){
-  const res = await fetch('https://api.openai.com/v1/chat/completions',{
+async function streamChat(sys, user, outEl){
+  const res = await fetch('/api/chat',{
     method:'POST',
-    headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       model:'gpt-4o-mini', stream:true, temperature:.7, max_tokens:2000,
       messages:[{role:'system',content:sys},{role:'user',content:user}]
@@ -994,11 +990,11 @@ async function streamChat(key, sys, user, outEl){
   return full;
 }
 
-async function bgChat(key, sys, user){
+async function bgChat(sys, user){
   try{
-    const res = await fetch('https://api.openai.com/v1/chat/completions',{
+    const res = await fetch('/api/chat',{
       method:'POST',
-      headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'gpt-4o-mini', stream:false, temperature:.7, max_tokens:2000,
         messages:[{role:'system',content:sys},{role:'user',content:user}]
