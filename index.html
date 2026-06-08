@@ -623,7 +623,7 @@ function renderCards(){
         <button class="btn-gen-logo" id="btnGenLogo" onclick="genLogo()">🎨 Сгенерировать логотип</button>
         <div class="logo-preview" id="logoPreview">
           <div class="logo-loading" id="logoLoading" style="display:none">⏳ Генерирую логотип...</div>
-          <img id="logoImg" style="display:none" alt="Логотип" crossorigin="anonymous">
+          <img id="logoImg" style="display:none" alt="Логотип">
         </div>
       ` : ''}
       <div class="card-hint">💡 ${b.hint}</div>`;
@@ -662,7 +662,7 @@ function onBlur(b){
 }
 
 // ─── LOGO GENERATION ─────────────────────────────────────────
-function genLogo(){
+async function genLogo(){
   const desc = (S.vals.logo||'').trim();
   if(desc.length < 3) return;
   const btn = document.getElementById('btnGenLogo');
@@ -678,24 +678,31 @@ function genLogo(){
   const prompt = encodeURIComponent('professional minimalist logo, vector flat design, clean white background, ' + desc);
   const url = 'https://image.pollinations.ai/prompt/' + prompt + '?width=512&height=512&nologo=true&seed=' + seed;
 
-  img.onload = function(){
+  try {
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    img.src = blobUrl;
     img.style.display = 'block';
     loading.style.display = 'none';
     btn.disabled = false; btn.textContent = '🔄 Сгенерировать заново';
 
+    // Save for wireframe
+    S.logoUrl = blobUrl;
+
     // Update wireframe header logo
     const wfLogo = document.getElementById('wfLogo');
     if(wfLogo){
-      wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+url+') center/contain no-repeat';
+      wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+blobUrl+') center/contain no-repeat';
     }
     document.getElementById('wfs-header').classList.add('fill');
-  };
-  img.onerror = function(){
-    loading.textContent = '❌ Не получилось. Попробуй другое описание.';
+  } catch(e) {
+    loading.textContent = '❌ Не получилось. Попробуй ещё раз через пару секунд.';
     loading.style.display = 'block';
     btn.disabled = false; btn.textContent = '🎨 Сгенерировать логотип';
-  };
-  img.src = url;
+  }
 }
 
 // ─── PROGRESS ────────────────────────────────────────────────
