@@ -689,42 +689,14 @@ const LOGO_STYLES = [
   {shape:'shield',    grad:['#c2410c','#fb923c']},
 ];
 
-async function genLogo(){
+function genLogo(){
   const desc = (S.vals.logo||'').trim();
   if(desc.length < 2) return;
   const btn = document.getElementById('btnGenLogo');
   const loading = document.getElementById('logoLoading');
   const img = document.getElementById('logoImg');
 
-  btn.disabled = true; btn.textContent = '⏳ ИИ рисует... (15-30 сек)';
-  loading.style.display = 'block';
-  loading.textContent = '⏳ DALL-E генерирует логотип...';
-  img.style.display = 'none';
-
-  // Try FLUX AI via Vercel API (Together.ai free)
-  try {
-    const res = await fetch('/api/logo', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ prompt: desc })
-    });
-    const data = await res.json();
-    if(res.ok && data.b64){
-      const dataUrl = 'data:image/png;base64,' + data.b64;
-      img.src = dataUrl;
-      img.style.display = 'block';
-      loading.style.display = 'none';
-      btn.disabled = false; btn.textContent = '🔄 Другой вариант';
-      S.logoUrl = dataUrl;
-      const wfLogo = document.getElementById('wfLogo');
-      if(wfLogo) wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+dataUrl+') center/contain no-repeat';
-      document.getElementById('wfs-header').classList.add('fill');
-      return;
-    }
-  } catch(e){}
-
-  // Fallback to SVG generator (offline/local mode)
-  btn.disabled = false;
+  loading.style.display = 'none';
 
   // Extract brand name — first capitalized word or first word
   const words = desc.split(/[\s,;.!]+/).filter(w=>w.length>0);
@@ -783,27 +755,63 @@ async function genLogo(){
     `<circle cx="48" cy="48" r="12" fill="${tc}" opacity="0.08"/><circle cx="208" cy="208" r="12" fill="${tc}" opacity="0.08"/>`,
   ];
 
-  // Text layouts — 5 variations
-  const layoutIdx = Math.floor(Math.random()*5);
+  // Detect themed icons from description
+  const iconMap = {
+    'космос':['🚀','✦','⟡'], 'ракет':['🚀','△','⬡'], 'space':['🚀','✦','◇'],
+    'rocket':['△','✦','⟡'], 'код':['⟨/⟩','▧','◈'], 'програм':['⟨/⟩','▧','◈'],
+    'code':['⟨/⟩','▧','◈'], 'dev':['⟨/⟩','▧','◈'], 'музык':['♪','♫','◎'],
+    'music':['♪','♫','◎'], 'игр':['▶','◆','⬡'], 'game':['▶','◆','⬡'],
+    'фото':['◎','⬡','□'], 'photo':['◎','⬡','□'], 'дизайн':['◈','✦','△'],
+    'design':['◈','✦','△'], 'стил':['✦','◇','◈'], 'еда':['◎','○','◇'],
+    'food':['◎','○','◇'], 'спорт':['★','△','◆'], 'sport':['★','△','◆'],
+    'учёб':['◇','▧','◈'], 'школ':['◇','▧','◈'], 'бизнес':['◆','▧','△'],
+    'студи':['✦','◈','◎'], 'studio':['✦','◈','◎'], 'tech':['⬡','◈','▧'],
+    'тех':['⬡','◈','▧'],
+  };
+  let iconChar = '✦';
+  for(const [k,v] of Object.entries(iconMap)){
+    if(dl.includes(k)){ iconChar = v[Math.floor(Math.random()*v.length)]; break; }
+  }
+
+  // Text layouts — 8 variations
+  const layoutIdx = Math.floor(Math.random()*8);
   const brandUp = brand.toUpperCase();
+  const bSize = Math.min(56, 320/brand.length);
   const layouts = [
-    // Classic: big initials + name below
-    `<text x="128" y="138" text-anchor="middle" font-family="system-ui,sans-serif" font-size="76" font-weight="900" fill="${tc}" letter-spacing="-3">${initials}</text>
-     <text x="128" y="200" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" font-weight="600" fill="${tc}" opacity="0.65" letter-spacing="4">${brandUp}</text>`,
-    // Full name centered
-    `<text x="128" y="138" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${Math.min(60, 340/brand.length)}" font-weight="800" fill="${tc}" letter-spacing="-1">${brandUp}</text>
-     <line x1="68" y1="160" x2="188" y2="160" stroke="${tc}" stroke-width="2" opacity="0.25" stroke-linecap="round"/>`,
-    // Single letter + underline name
-    `<text x="128" y="148" text-anchor="middle" font-family="Georgia,serif" font-size="110" font-weight="700" fill="${tc}" opacity="0.9">${initials[0]}</text>
-     <text x="128" y="210" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="700" fill="${tc}" opacity="0.5" letter-spacing="6">${brandUp}</text>`,
-    // Stacked two lines
-    `<text x="128" y="115" text-anchor="middle" font-family="system-ui,sans-serif" font-size="62" font-weight="900" fill="${tc}" letter-spacing="-2">${initials}</text>
-     <rect x="48" y="130" width="160" height="2" rx="1" fill="${tc}" opacity="0.2"/>
-     <text x="128" y="175" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="700" fill="${tc}" opacity="0.7" letter-spacing="2">${brandUp}</text>`,
-    // Monogram in circle + name
-    `<circle cx="128" cy="108" r="52" fill="${tc}" opacity="0.12"/>
-     <text x="128" y="122" text-anchor="middle" font-family="system-ui,sans-serif" font-size="48" font-weight="900" fill="${tc}">${initials}</text>
-     <text x="128" y="205" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="${tc}" opacity="0.6" letter-spacing="5">${brandUp}</text>`,
+    // 0: Icon above + initials + name
+    `<text x="128" y="90" text-anchor="middle" font-family="system-ui,sans-serif" font-size="42" fill="${tc}" opacity="0.3">${iconChar}</text>
+     <text x="128" y="152" text-anchor="middle" font-family="system-ui,sans-serif" font-size="64" font-weight="900" fill="${tc}" letter-spacing="-2">${initials}</text>
+     <text x="128" y="205" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="${tc}" opacity="0.55" letter-spacing="5">${brandUp}</text>`,
+    // 1: Full name bold centered with accent line
+    `<text x="128" y="125" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${bSize}" font-weight="900" fill="${tc}" letter-spacing="-1">${brandUp}</text>
+     <line x1="58" y1="148" x2="198" y2="148" stroke="${tc}" stroke-width="3" opacity="0.35" stroke-linecap="round"/>
+     <text x="128" y="180" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="${tc}" opacity="0.45" letter-spacing="3">${iconChar} STUDIO</text>`,
+    // 2: Big single letter serif + small name
+    `<text x="128" y="155" text-anchor="middle" font-family="Georgia,Times,serif" font-size="120" font-weight="700" fill="${tc}" opacity="0.85">${initials[0]}</text>
+     <text x="128" y="216" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="800" fill="${tc}" opacity="0.45" letter-spacing="7">${brandUp}</text>`,
+    // 3: Stacked with divider bar
+    `<text x="128" y="108" text-anchor="middle" font-family="system-ui,sans-serif" font-size="58" font-weight="900" fill="${tc}" letter-spacing="-2">${initials}</text>
+     <rect x="42" y="122" width="172" height="3" rx="2" fill="${tc}" opacity="0.25"/>
+     <text x="128" y="168" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" font-weight="700" fill="${tc}" opacity="0.65" letter-spacing="3">${brandUp}</text>
+     <text x="128" y="198" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="${tc}" opacity="0.3" letter-spacing="2">${iconChar} EST. 2025</text>`,
+    // 4: Monogram ring + name
+    `<circle cx="128" cy="105" r="52" fill="none" stroke="${tc}" stroke-width="3" opacity="0.2"/>
+     <circle cx="128" cy="105" r="42" fill="${tc}" opacity="0.08"/>
+     <text x="128" y="118" text-anchor="middle" font-family="system-ui,sans-serif" font-size="44" font-weight="900" fill="${tc}">${initials}</text>
+     <text x="128" y="208" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="800" fill="${tc}" opacity="0.55" letter-spacing="5">${brandUp}</text>`,
+    // 5: Side icon + name horizontal
+    `<text x="68" y="135" text-anchor="middle" font-family="system-ui,sans-serif" font-size="60" fill="${tc}" opacity="0.25">${iconChar}</text>
+     <text x="168" y="125" text-anchor="middle" font-family="system-ui,sans-serif" font-size="42" font-weight="900" fill="${tc}">${initials}</text>
+     <text x="128" y="195" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" font-weight="700" fill="${tc}" opacity="0.5" letter-spacing="4">${brandUp}</text>`,
+    // 6: Boxed initials + underline
+    `<rect x="64" y="52" width="128" height="100" rx="16" fill="${tc}" opacity="0.1"/>
+     <text x="128" y="118" text-anchor="middle" font-family="system-ui,sans-serif" font-size="56" font-weight="900" fill="${tc}">${initials}</text>
+     <text x="128" y="200" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="800" fill="${tc}" opacity="0.6" letter-spacing="3">${brandUp}</text>`,
+    // 7: Minimal dot + name
+    `<circle cx="128" cy="82" r="18" fill="${tc}" opacity="0.2"/>
+     <text x="128" y="90" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="900" fill="${tc}">${initials[0]}</text>
+     <text x="128" y="148" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${Math.min(44,280/brand.length)}" font-weight="900" fill="${tc}" letter-spacing="-1">${brandUp}</text>
+     <text x="128" y="195" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="${tc}" opacity="0.35" letter-spacing="3">${iconChar} CREATIVE</text>`,
   ];
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
