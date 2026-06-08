@@ -662,65 +662,97 @@ function onBlur(b){
 }
 
 // ─── LOGO GENERATION ─────────────────────────────────────────
+const LOGO_STYLES = [
+  // [shape, icon pattern]
+  {shape:'circle', grad:['#685BC7','#8b5cf6']},
+  {shape:'roundrect', grad:['#3b82f6','#06b6d4']},
+  {shape:'circle', grad:['#ef4444','#f97316']},
+  {shape:'roundrect', grad:['#22c55e','#06b6d4']},
+  {shape:'circle', grad:['#f59e0b','#ef4444']},
+  {shape:'roundrect', grad:['#ec4899','#8b5cf6']},
+  {shape:'circle', grad:['#111','#333']},
+  {shape:'roundrect', grad:['#0ea5e9','#3b82f6']},
+];
+
 function genLogo(){
   const desc = (S.vals.logo||'').trim();
-  if(desc.length < 3) return;
+  if(desc.length < 2) return;
   const btn = document.getElementById('btnGenLogo');
   const loading = document.getElementById('logoLoading');
   const img = document.getElementById('logoImg');
 
-  btn.disabled = true; btn.textContent = '⏳ Генерирую... (15-30 сек)';
-  loading.style.display = 'block';
-  loading.textContent = '⏳ ИИ рисует логотип, подожди...';
-  img.style.display = 'none';
+  // Extract brand name — first capitalized word or first word
+  const words = desc.split(/[\s,;.!]+/).filter(w=>w.length>0);
+  let brand = '';
+  for(const w of words){
+    if(w.length >= 2 && /[A-ZА-ЯЁ]/.test(w[0])){ brand = w; break; }
+  }
+  if(!brand) brand = words[words.length-1] || 'Logo';
+  const initials = brand.slice(0,2).toUpperCase();
 
-  // Remove old handlers
-  img.onload = null; img.onerror = null;
+  // Pick style based on description
+  const seed = Math.floor(Math.random()*LOGO_STYLES.length);
+  const style = LOGO_STYLES[seed];
 
-  const seed = Math.floor(Math.random()*999999);
-  const prompt = 'minimalist professional logo design, flat vector, white background, ' + desc;
-  const url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=512&height=512&seed=' + seed + '&nologo=true';
-
-  // Timeout — Pollinations can be slow
-  const timeout = setTimeout(function(){
-    if(img.style.display === 'none'){
-      loading.textContent = '⏳ Почти готово, ещё немного...';
-    }
-  }, 15000);
-
-  const failTimeout = setTimeout(function(){
-    if(img.style.display === 'none'){
-      loading.textContent = '❌ Сервер долго отвечает. Нажми кнопку ещё раз.';
-      btn.disabled = false; btn.textContent = '🎨 Попробовать снова';
-    }
-  }, 45000);
-
-  img.onload = function(){
-    clearTimeout(timeout);
-    clearTimeout(failTimeout);
-    img.style.display = 'block';
-    loading.style.display = 'none';
-    btn.disabled = false; btn.textContent = '🔄 Сгенерировать заново';
-
-    // Update wireframe header logo
-    const wfLogo = document.getElementById('wfLogo');
-    if(wfLogo){
-      wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+url+') center/contain no-repeat';
-    }
-    document.getElementById('wfs-header').classList.add('fill');
+  // Detect color hints
+  let c1 = style.grad[0], c2 = style.grad[1];
+  const colorHints = {
+    'красн':['#ef4444','#dc2626'], 'синий':['#3b82f6','#2563eb'], 'синем':['#3b82f6','#2563eb'],
+    'голуб':['#06b6d4','#0ea5e9'], 'зелен':['#22c55e','#16a34a'], 'фиолет':['#8b5cf6','#7c3aed'],
+    'оранж':['#f97316','#ea580c'], 'розов':['#ec4899','#db2777'], 'чёрн':['#1f2937','#111827'],
+    'жёлт':['#f59e0b','#d97706'], 'бел':['#f8fafc','#e2e8f0'],
+    'red':['#ef4444','#dc2626'], 'blue':['#3b82f6','#2563eb'], 'green':['#22c55e','#16a34a'],
+    'purple':['#8b5cf6','#7c3aed'], 'orange':['#f97316','#ea580c'], 'black':['#1f2937','#111827'],
   };
+  const dl = desc.toLowerCase();
+  for(const [k,v] of Object.entries(colorHints)){
+    if(dl.includes(k)){ c1=v[0]; c2=v[1]; break; }
+  }
 
-  img.onerror = function(){
-    clearTimeout(timeout);
-    clearTimeout(failTimeout);
-    loading.textContent = '❌ Не получилось. Нажми кнопку ещё раз.';
-    loading.style.display = 'block';
-    btn.disabled = false; btn.textContent = '🎨 Попробовать снова';
-  };
+  const isLight = ['#f8fafc','#f59e0b','#AADF00'].includes(c1);
+  const textColor = isLight ? '#1f2937' : '#ffffff';
 
-  // Start loading — no crossorigin, img tags don't need CORS
-  img.removeAttribute('crossorigin');
+  const shapeEl = style.shape === 'circle'
+    ? '<circle cx="128" cy="128" r="120" fill="url(#g)"/>'
+    : '<rect x="8" y="8" width="240" height="240" rx="48" fill="url(#g)"/>';
+
+  // Decorative element
+  const decoIdx = seed % 4;
+  const decos = [
+    '<circle cx="200" cy="60" r="30" fill="'+textColor+'" opacity="0.12"/>',
+    '<rect x="160" y="30" width="60" height="60" rx="12" fill="'+textColor+'" opacity="0.1" transform="rotate(15 190 60)"/>',
+    '<polygon points="128,20 148,56 108,56" fill="'+textColor+'" opacity="0.1"/>',
+    '<circle cx="60" cy="200" r="22" fill="'+textColor+'" opacity="0.1"/><circle cx="200" cy="56" r="16" fill="'+textColor+'" opacity="0.12"/>',
+  ];
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+    <defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/>
+    </linearGradient></defs>
+    ${shapeEl}
+    ${decos[decoIdx]}
+    <text x="128" y="142" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif"
+      font-size="72" font-weight="800" fill="${textColor}" letter-spacing="-2">${initials}</text>
+    <text x="128" y="202" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif"
+      font-size="18" font-weight="600" fill="${textColor}" opacity="0.7" letter-spacing="3">${brand.toUpperCase()}</text>
+  </svg>`;
+
+  const blob = new Blob([svg], {type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+
   img.src = url;
+  img.style.display = 'block';
+  loading.style.display = 'none';
+  btn.textContent = '🔄 Другой вариант';
+
+  S.logoUrl = url;
+
+  // Update wireframe header
+  const wfLogo = document.getElementById('wfLogo');
+  if(wfLogo){
+    wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+url+') center/contain no-repeat';
+  }
+  document.getElementById('wfs-header').classList.add('fill');
 }
 
 // ─── PROGRESS ────────────────────────────────────────────────
