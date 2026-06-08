@@ -663,15 +663,30 @@ function onBlur(b){
 
 // ─── LOGO GENERATION ─────────────────────────────────────────
 const LOGO_STYLES = [
-  // [shape, icon pattern]
-  {shape:'circle', grad:['#685BC7','#8b5cf6']},
+  {shape:'circle',    grad:['#685BC7','#8b5cf6']},
   {shape:'roundrect', grad:['#3b82f6','#06b6d4']},
-  {shape:'circle', grad:['#ef4444','#f97316']},
+  {shape:'circle',    grad:['#ef4444','#f97316']},
   {shape:'roundrect', grad:['#22c55e','#06b6d4']},
-  {shape:'circle', grad:['#f59e0b','#ef4444']},
+  {shape:'circle',    grad:['#f59e0b','#ef4444']},
   {shape:'roundrect', grad:['#ec4899','#8b5cf6']},
-  {shape:'circle', grad:['#111','#333']},
+  {shape:'circle',    grad:['#111827','#374151']},
   {shape:'roundrect', grad:['#0ea5e9','#3b82f6']},
+  {shape:'hexagon',   grad:['#7c3aed','#a78bfa']},
+  {shape:'diamond',   grad:['#dc2626','#f97316']},
+  {shape:'shield',    grad:['#1e40af','#3b82f6']},
+  {shape:'hexagon',   grad:['#059669','#34d399']},
+  {shape:'roundrect', grad:['#be185d','#ec4899']},
+  {shape:'circle',    grad:['#0f172a','#1e293b']},
+  {shape:'shield',    grad:['#7c3aed','#c084fc']},
+  {shape:'diamond',   grad:['#f59e0b','#fbbf24']},
+  {shape:'hexagon',   grad:['#0891b2','#22d3ee']},
+  {shape:'roundrect', grad:['#4f46e5','#818cf8']},
+  {shape:'shield',    grad:['#15803d','#4ade80']},
+  {shape:'circle',    grad:['#9333ea','#e879f9']},
+  {shape:'diamond',   grad:['#1d4ed8','#60a5fa']},
+  {shape:'hexagon',   grad:['#b91c1c','#fca5a5']},
+  {shape:'roundrect', grad:['#0d9488','#5eead4']},
+  {shape:'shield',    grad:['#c2410c','#fb923c']},
 ];
 
 function genLogo(){
@@ -709,20 +724,56 @@ function genLogo(){
     if(dl.includes(k)){ c1=v[0]; c2=v[1]; break; }
   }
 
-  const isLight = ['#f8fafc','#f59e0b','#AADF00'].includes(c1);
+  const isLight = ['#f8fafc','#f59e0b','#fbbf24','#AADF00','#fca5a5','#5eead4','#4ade80','#e879f9','#34d399','#22d3ee','#60a5fa','#c084fc'].includes(c2);
   const textColor = isLight ? '#1f2937' : '#ffffff';
 
-  const shapeEl = style.shape === 'circle'
-    ? '<circle cx="128" cy="128" r="120" fill="url(#g)"/>'
-    : '<rect x="8" y="8" width="240" height="240" rx="48" fill="url(#g)"/>';
+  // Shapes
+  const shapes = {
+    circle:    '<circle cx="128" cy="128" r="120" fill="url(#g)"/>',
+    roundrect: '<rect x="8" y="8" width="240" height="240" rx="48" fill="url(#g)"/>',
+    hexagon:   '<polygon points="128,8 240,68 240,188 128,248 16,188 16,68" fill="url(#g)"/>',
+    diamond:   '<polygon points="128,8 240,128 128,248 16,128" fill="url(#g)"/>',
+    shield:    '<path d="M128,8 L240,50 L240,160 Q240,220 128,248 Q16,220 16,160 L16,50 Z" fill="url(#g)"/>',
+  };
+  const shapeEl = shapes[style.shape] || shapes.roundrect;
 
-  // Decorative element
-  const decoIdx = seed % 4;
+  // Decorative elements — 10 variations
+  const decoIdx = Math.floor(Math.random()*10);
+  const tc = textColor;
   const decos = [
-    '<circle cx="200" cy="60" r="30" fill="'+textColor+'" opacity="0.12"/>',
-    '<rect x="160" y="30" width="60" height="60" rx="12" fill="'+textColor+'" opacity="0.1" transform="rotate(15 190 60)"/>',
-    '<polygon points="128,20 148,56 108,56" fill="'+textColor+'" opacity="0.1"/>',
-    '<circle cx="60" cy="200" r="22" fill="'+textColor+'" opacity="0.1"/><circle cx="200" cy="56" r="16" fill="'+textColor+'" opacity="0.12"/>',
+    `<circle cx="200" cy="56" r="28" fill="${tc}" opacity="0.1"/>`,
+    `<rect x="165" y="30" width="55" height="55" rx="14" fill="${tc}" opacity="0.08" transform="rotate(20 190 55)"/>`,
+    `<polygon points="128,16 145,50 111,50" fill="${tc}" opacity="0.1"/>`,
+    `<circle cx="56" cy="200" r="20" fill="${tc}" opacity="0.08"/><circle cx="200" cy="52" r="14" fill="${tc}" opacity="0.1"/>`,
+    `<line x1="30" y1="30" x2="80" y2="30" stroke="${tc}" stroke-width="3" opacity="0.12" stroke-linecap="round"/><line x1="176" y1="226" x2="226" y2="226" stroke="${tc}" stroke-width="3" opacity="0.12" stroke-linecap="round"/>`,
+    `<circle cx="200" cy="60" r="8" fill="${tc}" opacity="0.2"/><circle cx="215" cy="80" r="5" fill="${tc}" opacity="0.15"/><circle cx="190" cy="45" r="4" fill="${tc}" opacity="0.12"/>`,
+    `<rect x="180" y="170" width="40" height="40" rx="8" fill="${tc}" opacity="0.06" transform="rotate(45 200 190)"/>`,
+    `<path d="M40,200 Q70,170 60,210" stroke="${tc}" stroke-width="2" fill="none" opacity="0.1"/><path d="M196,40 Q226,30 210,60" stroke="${tc}" stroke-width="2" fill="none" opacity="0.1"/>`,
+    `<circle cx="128" cy="128" r="100" fill="none" stroke="${tc}" stroke-width="1" opacity="0.08"/>`,
+    `<circle cx="48" cy="48" r="12" fill="${tc}" opacity="0.08"/><circle cx="208" cy="208" r="12" fill="${tc}" opacity="0.08"/>`,
+  ];
+
+  // Text layouts — 5 variations
+  const layoutIdx = Math.floor(Math.random()*5);
+  const brandUp = brand.toUpperCase();
+  const layouts = [
+    // Classic: big initials + name below
+    `<text x="128" y="138" text-anchor="middle" font-family="system-ui,sans-serif" font-size="76" font-weight="900" fill="${tc}" letter-spacing="-3">${initials}</text>
+     <text x="128" y="200" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" font-weight="600" fill="${tc}" opacity="0.65" letter-spacing="4">${brandUp}</text>`,
+    // Full name centered
+    `<text x="128" y="138" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${Math.min(60, 340/brand.length)}" font-weight="800" fill="${tc}" letter-spacing="-1">${brandUp}</text>
+     <line x1="68" y1="160" x2="188" y2="160" stroke="${tc}" stroke-width="2" opacity="0.25" stroke-linecap="round"/>`,
+    // Single letter + underline name
+    `<text x="128" y="148" text-anchor="middle" font-family="Georgia,serif" font-size="110" font-weight="700" fill="${tc}" opacity="0.9">${initials[0]}</text>
+     <text x="128" y="210" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="700" fill="${tc}" opacity="0.5" letter-spacing="6">${brandUp}</text>`,
+    // Stacked two lines
+    `<text x="128" y="115" text-anchor="middle" font-family="system-ui,sans-serif" font-size="62" font-weight="900" fill="${tc}" letter-spacing="-2">${initials}</text>
+     <rect x="48" y="130" width="160" height="2" rx="1" fill="${tc}" opacity="0.2"/>
+     <text x="128" y="175" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="700" fill="${tc}" opacity="0.7" letter-spacing="2">${brandUp}</text>`,
+    // Monogram in circle + name
+    `<circle cx="128" cy="108" r="52" fill="${tc}" opacity="0.12"/>
+     <text x="128" y="122" text-anchor="middle" font-family="system-ui,sans-serif" font-size="48" font-weight="900" fill="${tc}">${initials}</text>
+     <text x="128" y="205" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="${tc}" opacity="0.6" letter-spacing="5">${brandUp}</text>`,
   ];
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
@@ -731,10 +782,7 @@ function genLogo(){
     </linearGradient></defs>
     ${shapeEl}
     ${decos[decoIdx]}
-    <text x="128" y="142" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif"
-      font-size="72" font-weight="800" fill="${textColor}" letter-spacing="-2">${initials}</text>
-    <text x="128" y="202" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif"
-      font-size="18" font-weight="600" fill="${textColor}" opacity="0.7" letter-spacing="3">${brand.toUpperCase()}</text>
+    ${layouts[layoutIdx]}
   </svg>`;
 
   const blob = new Blob([svg], {type:'image/svg+xml'});
