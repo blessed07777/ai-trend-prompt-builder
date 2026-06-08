@@ -662,47 +662,65 @@ function onBlur(b){
 }
 
 // ─── LOGO GENERATION ─────────────────────────────────────────
-async function genLogo(){
+function genLogo(){
   const desc = (S.vals.logo||'').trim();
   if(desc.length < 3) return;
   const btn = document.getElementById('btnGenLogo');
   const loading = document.getElementById('logoLoading');
   const img = document.getElementById('logoImg');
 
-  btn.disabled = true; btn.textContent = '⏳ Генерирую... (10-20 сек)';
+  btn.disabled = true; btn.textContent = '⏳ Генерирую... (15-30 сек)';
   loading.style.display = 'block';
-  loading.textContent = '⏳ Генерирую логотип...';
+  loading.textContent = '⏳ ИИ рисует логотип, подожди...';
   img.style.display = 'none';
 
+  // Remove old handlers
+  img.onload = null; img.onerror = null;
+
   const seed = Math.floor(Math.random()*999999);
-  const prompt = encodeURIComponent('professional minimalist logo, vector flat design, clean white background, ' + desc);
-  const url = 'https://image.pollinations.ai/prompt/' + prompt + '?width=512&height=512&nologo=true&seed=' + seed;
+  const prompt = 'minimalist professional logo design, flat vector, white background, ' + desc;
+  const url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=512&height=512&seed=' + seed + '&nologo=true';
 
-  try {
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const blob = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
+  // Timeout — Pollinations can be slow
+  const timeout = setTimeout(function(){
+    if(img.style.display === 'none'){
+      loading.textContent = '⏳ Почти готово, ещё немного...';
+    }
+  }, 15000);
 
-    img.src = blobUrl;
+  const failTimeout = setTimeout(function(){
+    if(img.style.display === 'none'){
+      loading.textContent = '❌ Сервер долго отвечает. Нажми кнопку ещё раз.';
+      btn.disabled = false; btn.textContent = '🎨 Попробовать снова';
+    }
+  }, 45000);
+
+  img.onload = function(){
+    clearTimeout(timeout);
+    clearTimeout(failTimeout);
     img.style.display = 'block';
     loading.style.display = 'none';
     btn.disabled = false; btn.textContent = '🔄 Сгенерировать заново';
 
-    // Save for wireframe
-    S.logoUrl = blobUrl;
-
     // Update wireframe header logo
     const wfLogo = document.getElementById('wfLogo');
     if(wfLogo){
-      wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+blobUrl+') center/contain no-repeat';
+      wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+url+') center/contain no-repeat';
     }
     document.getElementById('wfs-header').classList.add('fill');
-  } catch(e) {
-    loading.textContent = '❌ Не получилось. Попробуй ещё раз через пару секунд.';
+  };
+
+  img.onerror = function(){
+    clearTimeout(timeout);
+    clearTimeout(failTimeout);
+    loading.textContent = '❌ Не получилось. Нажми кнопку ещё раз.';
     loading.style.display = 'block';
-    btn.disabled = false; btn.textContent = '🎨 Сгенерировать логотип';
-  }
+    btn.disabled = false; btn.textContent = '🎨 Попробовать снова';
+  };
+
+  // Start loading — no crossorigin, img tags don't need CORS
+  img.removeAttribute('crossorigin');
+  img.src = url;
 }
 
 // ─── PROGRESS ────────────────────────────────────────────────
