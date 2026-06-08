@@ -104,6 +104,31 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .card-ta::placeholder{color:var(--text3);font-style:italic}
 .card-hint{margin-top:7px;font-size:11px;color:var(--text2);display:flex;align-items:flex-start;gap:4px;line-height:1.4}
 
+/* Logo gen */
+.btn-gen-logo{
+  margin-top:8px;width:100%;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,#f97316,#fb923c);
+  border:none;color:#fff;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+  transition:opacity .2s,transform .1s;
+  box-shadow:0 3px 12px rgba(249,115,22,.35);
+}
+.btn-gen-logo:hover{opacity:.9;transform:scale(1.01)}
+.btn-gen-logo:active{transform:scale(.98)}
+.btn-gen-logo:disabled{opacity:.5;cursor:wait}
+.logo-preview{
+  margin-top:10px;border-radius:10px;overflow:hidden;
+  background:var(--surface2);border:1.5px solid var(--border);
+  min-height:0;transition:min-height .3s;
+  text-align:center;
+}
+.logo-preview:has(img[style*="block"]){min-height:180px}
+.logo-loading{padding:18px;color:var(--text2);font-size:13px}
+.logo-preview img{
+  width:100%;max-height:260px;object-fit:contain;
+  border-radius:8px;display:block;
+}
+
 /* ── WIREFRAME ── */
 .wf-panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;height:100%;transition:background .3s}
 .wf-hdr{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0}
@@ -509,33 +534,39 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <script>
 // ─── BLOCK CONFIG ───────────────────────────────────────────
 const BLOCKS = [
-  {id:'header',  n:1, em:'🔝', name:'Шапка',         acc:'#3b82f6',
+  {id:'logo',    n:1, em:'🎨', name:'Логотип',       acc:'#f97316',
+   q:'Опиши какой логотип ты хочешь для сайта',
+   ph:'Например: Космический логотип с ракетой, фиолетовый фон, минималистичный стиль',
+   hint:'Опиши стиль, цвет, что изображено — ИИ сгенерирует логотип в реальном времени!',
+   wf:'wfs-header'},
+
+  {id:'header',  n:2, em:'🔝', name:'Шапка',         acc:'#3b82f6',
    q:'Что будет в шапке сайта?',
    ph:'Например: Логотип с именем, меню: Главная, Портфолио, Обо мне, Контакты',
    hint:'Логотип, название, пункты навигации', wf:'wfs-header'},
 
-  {id:'hero',    n:2, em:'🎯', name:'Главный экран', acc:'#f59e0b',
+  {id:'hero',    n:3, em:'🎯', name:'Главный экран', acc:'#f59e0b',
    q:'Что увидит посетитель первым делом?',
    ph:'Например: Большой заголовок "Я создаю красивые сайты", подзаголовок и кнопка "Смотреть работы"',
    hint:'Заголовок, подзаголовок, кнопка призыва к действию', wf:'wfs-hero'},
 
-  {id:'about_me',n:3, em:'👤', name:'Обо мне',       acc:'#22c55e',
+  {id:'about_me',n:4, em:'👤', name:'Обо мне',       acc:'#22c55e',
    q:'Что рассказать о себе?',
    ph:'Например: Меня зовут Иван, мне 16 лет. Учусь на разработчика, люблю создавать сайты.',
    hint:'Фото, имя, возраст, увлечения', wf:'wfs-about'},
 
-  {id:'contacts',  n:4, em:'📬', name:'Контакты',         acc:'#06b6d4',
+  {id:'contacts',  n:5, em:'📬', name:'Контакты',         acc:'#06b6d4',
    q:'Как с тобой можно связаться?',
    ph:'Например: Email hello@mail.ru, Telegram @username, GitHub, ВКонтакте',
    hint:'Email, соцсети, мессенджеры', wf:'wfs-contacts'},
 
-  {id:'whatsapp',n:5, em:'📱', name:'Заявки (WhatsApp)', acc:'#25d366',
+  {id:'whatsapp',n:6, em:'📱', name:'Заявки (WhatsApp)', acc:'#25d366',
    q:'Напиши номер WhatsApp и текст приветствия для кнопки',
    ph:'Номер: +77071234567\nТекст кнопки: Привет! Хочу заказать сайт 🚀',
    hint:'Первая строка — номер (например +77071234567), вторая — готовый текст, который увидит клиент при нажатии на кнопку',
    wf:'wfs-contacts'},
 
-  {id:'style_anim',n:6, em:'✨', name:'Стиль & Анимации', acc:'#a855f7',
+  {id:'style_anim',n:7, em:'✨', name:'Стиль & Анимации', acc:'#a855f7',
    q:'Как должен выглядеть сайт и какие анимации ты хочешь?',
    ph:'Например: тёмный фон, фиолетовые акценты #8b5cf6, плавный fade-in при скролле, hover-эффекты на кнопках, glassmorphism-карточки, частицы на фоне',
    hint:'Цвета, шрифт, анимации появления, hover-эффекты, общее настроение',
@@ -588,6 +619,13 @@ function renderCards(){
       </div>
       <div class="card-q">${b.q}</div>
       <textarea class="card-ta" id="ta-${b.id}" placeholder="${b.ph}"></textarea>
+      ${b.id==='logo' ? `
+        <button class="btn-gen-logo" id="btnGenLogo" onclick="genLogo()">🎨 Сгенерировать логотип</button>
+        <div class="logo-preview" id="logoPreview">
+          <div class="logo-loading" id="logoLoading" style="display:none">⏳ Генерирую логотип...</div>
+          <img id="logoImg" style="display:none" alt="Логотип">
+        </div>
+      ` : ''}
       <div class="card-hint">💡 ${b.hint}</div>`;
     col.appendChild(d);
 
@@ -621,6 +659,47 @@ function onBlur(b){
   document.getElementById('card-'+b.id).classList.remove('foc');
   const el = document.getElementById(b.wf);
   if(el) el.classList.remove('act');
+}
+
+// ─── LOGO GENERATION ─────────────────────────────────────────
+let logoDebounce = null;
+function genLogo(){
+  const desc = (S.vals.logo||'').trim();
+  if(desc.length < 3) return;
+  const btn = document.getElementById('btnGenLogo');
+  const loading = document.getElementById('logoLoading');
+  const img = document.getElementById('logoImg');
+
+  btn.disabled = true; btn.textContent = '⏳ Генерирую...';
+  loading.style.display = 'block';
+  img.style.display = 'none';
+
+  const prompt = encodeURIComponent('professional logo design, flat vector, clean, white background, ' + desc);
+  const url = 'https://image.pollinations.ai/prompt/' + prompt + '?width=512&height=512&nologo=true&seed=' + Date.now();
+
+  const newImg = new Image();
+  newImg.onload = function(){
+    img.src = url;
+    img.style.display = 'block';
+    loading.style.display = 'none';
+    btn.disabled = false; btn.textContent = '🎨 Сгенерировать заново';
+
+    // Update wireframe header logo
+    const wfLogo = document.getElementById('wfLogo');
+    if(wfLogo){
+      wfLogo.style.background = 'url('+url+') center/contain no-repeat';
+      wfLogo.style.width = '28px';
+      wfLogo.style.height = '28px';
+      wfLogo.style.borderRadius = '4px';
+      wfLogo.style.opacity = '1';
+    }
+    document.getElementById('wfs-header').classList.add('fill');
+  };
+  newImg.onerror = function(){
+    loading.textContent = '❌ Ошибка, попробуй ещё раз';
+    btn.disabled = false; btn.textContent = '🎨 Сгенерировать логотип';
+  };
+  newImg.src = url;
 }
 
 // ─── PROGRESS ────────────────────────────────────────────────
@@ -667,6 +746,11 @@ function updateWF(b, v){
   const filled = v.length > 3;
 
   switch(b.id){
+    case 'logo':{
+      // Logo block just marks header as partially filled — actual gen via button
+      document.getElementById('wfs-header').classList.toggle('fill', filled);
+      break;
+    }
     case 'header':{
       // nav items
       const items = v.split(/[,;|\/]/).map(s=>s.replace(/[•\-–]/g,'').trim()).filter(s=>s.length>1&&s.length<24);
@@ -895,7 +979,7 @@ function buildStaticPrompt(){
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'(не заполнено)'}`;
   S.pRu = [
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
-    sec('about_me','ОБО МНЕ'),
+    sec('logo','ЛОГОТИП'), sec('about_me','ОБО МНЕ'),
     sec('contacts','КОНТАКТЫ'), sec('whatsapp','ЗАЯВКИ WHATSAPP'),
     sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
@@ -981,7 +1065,7 @@ function buildUserContent(){
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'не указано'}`;
   return 'Создай промпт для разработки сайта по описанию ниже:\n\n'+[
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
-    sec('about_me','ОБО МНЕ'),
+    sec('logo','ЛОГОТИП'), sec('about_me','ОБО МНЕ'),
     sec('contacts','КОНТАКТЫ'), sec('whatsapp','ЗАЯВКИ WHATSAPP'),
     sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
