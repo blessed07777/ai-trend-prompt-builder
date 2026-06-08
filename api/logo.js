@@ -9,25 +9,23 @@ export default async function handler(req) {
 
   const { prompt } = await req.json();
 
-  const fullPrompt = `Design a professional, modern logo for: ${prompt}.
-Style: Clean minimalist vector logo on a solid colored background.
-The logo should look like it was made by a top branding agency.
-Use bold typography, simple geometric shapes, and a cohesive color palette.
-No photorealistic elements, no gradients on text, no busy details.
-Think Apple, Nike, Airbnb level of simplicity and impact.`;
+  const fullPrompt = `Professional minimalist logo design, flat vector style, clean solid background, bold typography, simple geometric icon. Brand: ${prompt}. Style: modern, premium, like Apple or Nike branding.`;
 
-  const response = await fetch('https://api.openai.com/v1/images/generations', {
+  // Together.ai — FLUX.1-schnell-Free is completely free
+  const response = await fetch('https://api.together.xyz/v1/images/generations', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${process.env.OPENAI_KEY}`,
+      'Authorization': `Bearer ${process.env.TOGETHER_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'dall-e-3',
+      model: 'black-forest-labs/FLUX.1-schnell-Free',
       prompt: fullPrompt,
+      width: 1024,
+      height: 1024,
+      steps: 4,
       n: 1,
-      size: '1024x1024',
-      quality: 'standard',
+      response_format: 'b64_json',
     }),
   });
 
@@ -40,8 +38,15 @@ Think Apple, Nike, Airbnb level of simplicity and impact.`;
     });
   }
 
-  const url = data.data?.[0]?.url || '';
-  return new Response(JSON.stringify({ url }), {
+  const b64 = data.data?.[0]?.b64_json || '';
+  if (!b64) {
+    return new Response(JSON.stringify({ error: 'No image generated' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    });
+  }
+
+  return new Response(JSON.stringify({ b64 }), {
     headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
   });
 }

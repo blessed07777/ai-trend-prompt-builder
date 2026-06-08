@@ -701,7 +701,7 @@ async function genLogo(){
   loading.textContent = '⏳ DALL-E генерирует логотип...';
   img.style.display = 'none';
 
-  // Try DALL-E 3 via Vercel API
+  // Try FLUX AI via Vercel API (Together.ai free)
   try {
     const res = await fetch('/api/logo', {
       method: 'POST',
@@ -709,21 +709,19 @@ async function genLogo(){
       body: JSON.stringify({ prompt: desc })
     });
     const data = await res.json();
-    if(res.ok && data.url){
-      img.src = data.url;
+    if(res.ok && data.b64){
+      const dataUrl = 'data:image/png;base64,' + data.b64;
+      img.src = dataUrl;
       img.style.display = 'block';
       loading.style.display = 'none';
-      btn.disabled = false; btn.textContent = '🔄 Другой вариант (DALL-E 3)';
-      S.logoUrl = data.url;
+      btn.disabled = false; btn.textContent = '🔄 Другой вариант';
+      S.logoUrl = dataUrl;
       const wfLogo = document.getElementById('wfLogo');
-      if(wfLogo) wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+data.url+') center/contain no-repeat';
+      if(wfLogo) wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+dataUrl+') center/contain no-repeat';
       document.getElementById('wfs-header').classList.add('fill');
       return;
     }
-    // API returned error — fall through to SVG
-  } catch(e){
-    // Network error or local dev — fall through to SVG
-  }
+  } catch(e){}
 
   // Fallback to SVG generator (offline/local mode)
   btn.disabled = false;
