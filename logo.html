@@ -253,29 +253,42 @@ async function generate(){
   hideStatus();
   addSkeleton();
 
-  try {
-    const res = await fetch('/api/logo',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ prompt })
-    });
-
-    // Check if response is image or JSON error
-    const ct = res.headers.get('content-type') || '';
-    if(!res.ok || ct.includes('json')){
-      const data = await res.json().catch(()=>({}));
-      throw new Error(data.error || 'Ошибка генерации');
+  async function tryFetch(attempt){
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(), 90000);
+    try {
+      const res = await fetch('/api/logo',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ prompt }),
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      const ct = res.headers.get('content-type') || '';
+      if(!res.ok || ct.includes('json')){
+        const data = await res.json().catch(()=>({}));
+        throw new Error(data.error || 'Ошибка генерации');
+      }
+      return await res.blob();
+    } catch(e){
+      clearTimeout(timer);
+      if(attempt < 2){
+        setStatus('⏳ Повторная попытка...', false);
+        return tryFetch(attempt+1);
+      }
+      throw e;
     }
+  }
 
-    const blob = await res.blob();
+  try {
+    const blob = await tryFetch(0);
     const blobUrl = URL.createObjectURL(blob);
     removeSkeleton();
     addLogoCard(blobUrl, prompt);
     hideStatus();
-
   } catch(e){
     removeSkeleton();
-    setStatus('❌ ' + e.message, true);
+    setStatus('❌ ' + (e.name==='AbortError'?'Таймаут. Попробуй ещё раз.':e.message), true);
   }
 
   busy = false;
