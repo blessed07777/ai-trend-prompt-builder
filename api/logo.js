@@ -28,7 +28,6 @@ Think Apple, Nike, Airbnb level of simplicity and impact.`;
       n: 1,
       size: '1024x1024',
       quality: 'standard',
-      response_format: 'url',
     }),
   });
 
@@ -41,7 +40,8 @@ Think Apple, Nike, Airbnb level of simplicity and impact.`;
     });
   }
 
-  return new Response(JSON.stringify({ url: data.data[0].url }), {
+  const url = data.data?.[0]?.url || '';
+  return new Response(JSON.stringify({ url }), {
     headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
   });
 }
