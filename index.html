@@ -623,7 +623,7 @@ function renderCards(){
         <button class="btn-gen-logo" id="btnGenLogo" onclick="genLogo()">🎨 Сгенерировать логотип</button>
         <div class="logo-preview" id="logoPreview">
           <div class="logo-loading" id="logoLoading" style="display:none">⏳ Генерирую логотип...</div>
-          <img id="logoImg" style="display:none" alt="Логотип">
+          <img id="logoImg" style="display:none" alt="Логотип" crossorigin="anonymous">
         </div>
       ` : ''}
       <div class="card-hint">💡 ${b.hint}</div>`;
@@ -662,7 +662,6 @@ function onBlur(b){
 }
 
 // ─── LOGO GENERATION ─────────────────────────────────────────
-let logoDebounce = null;
 function genLogo(){
   const desc = (S.vals.logo||'').trim();
   if(desc.length < 3) return;
@@ -670,36 +669,33 @@ function genLogo(){
   const loading = document.getElementById('logoLoading');
   const img = document.getElementById('logoImg');
 
-  btn.disabled = true; btn.textContent = '⏳ Генерирую...';
+  btn.disabled = true; btn.textContent = '⏳ Генерирую... (10-20 сек)';
   loading.style.display = 'block';
+  loading.textContent = '⏳ Генерирую логотип...';
   img.style.display = 'none';
 
-  const prompt = encodeURIComponent('professional logo design, flat vector, clean, white background, ' + desc);
-  const url = 'https://image.pollinations.ai/prompt/' + prompt + '?width=512&height=512&nologo=true&seed=' + Date.now();
+  const seed = Math.floor(Math.random()*999999);
+  const prompt = encodeURIComponent('professional minimalist logo, vector flat design, clean white background, ' + desc);
+  const url = 'https://image.pollinations.ai/prompt/' + prompt + '?width=512&height=512&nologo=true&seed=' + seed;
 
-  const newImg = new Image();
-  newImg.onload = function(){
-    img.src = url;
+  img.onload = function(){
     img.style.display = 'block';
     loading.style.display = 'none';
-    btn.disabled = false; btn.textContent = '🎨 Сгенерировать заново';
+    btn.disabled = false; btn.textContent = '🔄 Сгенерировать заново';
 
     // Update wireframe header logo
     const wfLogo = document.getElementById('wfLogo');
     if(wfLogo){
-      wfLogo.style.background = 'url('+url+') center/contain no-repeat';
-      wfLogo.style.width = '28px';
-      wfLogo.style.height = '28px';
-      wfLogo.style.borderRadius = '4px';
-      wfLogo.style.opacity = '1';
+      wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+url+') center/contain no-repeat';
     }
     document.getElementById('wfs-header').classList.add('fill');
   };
-  newImg.onerror = function(){
-    loading.textContent = '❌ Ошибка, попробуй ещё раз';
+  img.onerror = function(){
+    loading.textContent = '❌ Не получилось. Попробуй другое описание.';
+    loading.style.display = 'block';
     btn.disabled = false; btn.textContent = '🎨 Сгенерировать логотип';
   };
-  newImg.src = url;
+  img.src = url;
 }
 
 // ─── PROGRESS ────────────────────────────────────────────────
