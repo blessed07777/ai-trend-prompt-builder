@@ -689,12 +689,42 @@ const LOGO_STYLES = [
   {shape:'shield',    grad:['#c2410c','#fb923c']},
 ];
 
-function genLogo(){
+async function genLogo(){
   const desc = (S.vals.logo||'').trim();
   if(desc.length < 2) return;
   const btn = document.getElementById('btnGenLogo');
   const loading = document.getElementById('logoLoading');
   const img = document.getElementById('logoImg');
+
+  btn.disabled = true; btn.textContent = '⏳ ИИ рисует... (15-30 сек)';
+  loading.style.display = 'block';
+  loading.textContent = '⏳ DALL-E генерирует логотип...';
+  img.style.display = 'none';
+
+  // Try DALL-E first
+  try {
+    const res = await fetch('/api/logo', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt: desc })
+    });
+    const data = await res.json();
+    if(res.ok && data.url){
+      img.src = data.url;
+      img.style.display = 'block';
+      loading.style.display = 'none';
+      btn.disabled = false; btn.textContent = '🔄 Другой вариант';
+      S.logoUrl = data.url;
+      const wfLogo = document.getElementById('wfLogo');
+      if(wfLogo) wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+data.url+') center/contain no-repeat';
+      document.getElementById('wfs-header').classList.add('fill');
+      return;
+    }
+  } catch(e){}
+
+  // Fallback to SVG generator
+  loading.textContent = '🎨 Создаю SVG логотип...';
+  btn.disabled = false;
 
   // Extract brand name — first capitalized word or first word
   const words = desc.split(/[\s,;.!]+/).filter(w=>w.length>0);
