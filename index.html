@@ -73,6 +73,17 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   transition:opacity .2s,transform .1s;
 }
 .btn-main:hover{opacity:.88;transform:scale(1.02)}
+.btn-logo-link{
+  padding:0 14px;height:34px;border-radius:22px;
+  background:linear-gradient(135deg,#f97316,#fb923c);
+  border:none;color:#fff;font-size:13px;font-weight:600;
+  cursor:pointer;white-space:nowrap;font-family:inherit;
+  box-shadow:0 2px 10px rgba(249,115,22,.35);
+  text-decoration:none;display:flex;align-items:center;
+  transition:opacity .2s,transform .1s;
+}
+.btn-logo-link:hover{opacity:.88;transform:scale(1.02)}
+@media(max-width:768px){.btn-logo-link{display:none}}
 
 /* ── LAYOUT ── */
 .main{display:flex;height:calc(100vh - var(--hh));margin-top:var(--hh);overflow:hidden}
@@ -329,6 +340,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <button class="tog" id="tog" onclick="toggleTheme()">
       <div class="tog-ball" id="togBall">🌙</div>
     </button>
+    <a href="logo.html" class="btn-logo-link">🎨 Логотип</a>
     <button class="btn-main" onclick="openModal()">🚀 Сгенерировать</button>
   </div>
 
@@ -342,6 +354,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <button class="mob-tab" id="mobTabP" onclick="mobSwitch('preview')">
     <span class="mob-tab-icon">👁</span>Превью
   </button>
+  <a href="logo.html" class="mob-tab" style="flex:0.7;text-decoration:none">
+    <span class="mob-tab-icon">🎨</span>Лого
+  </a>
   <button class="mob-btn-prompt" onclick="openModal()">🚀 Создать</button>
 </div>
 

@@ -223,15 +223,18 @@ async function generate(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ prompt })
     });
-    const data = await res.json();
 
-    if(!res.ok || !data.b64){
+    // Check if response is image or JSON error
+    const ct = res.headers.get('content-type') || '';
+    if(!res.ok || ct.includes('json')){
+      const data = await res.json().catch(()=>({}));
       throw new Error(data.error || 'Ошибка генерации');
     }
 
-    const dataUrl = 'data:image/png;base64,' + data.b64;
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
     removeSkeleton();
-    addLogoCard(dataUrl, prompt);
+    addLogoCard(blobUrl, prompt);
     hideStatus();
 
   } catch(e){
