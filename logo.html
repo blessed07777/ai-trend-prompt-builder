@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI TREND — Генератор логотипов</title>
+<style>
+:root{--bg:#09080f;--surface:#131120;--surface2:#1c1a2e;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0eeff;--text2:#9991cc;--text3:#6b639b;--accent:#f97316}
+[data-theme=light]{--bg:#eeecff;--surface:#ffffff;--surface2:#f3f1ff;--border:rgba(104,91,199,0.15);--border2:rgba(104,91,199,0.25);--text:#1a1530;--text2:#6b5fa0;--text3:#a09ac0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;transition:background .3s,color .3s}
+
+/* Header */
+.hdr{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px;position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-txt{font-size:16px;font-weight:800;color:#685BC7}
+.logo-txt span{font-weight:400;opacity:.7}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:10px}
+.back-btn{padding:6px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;font-family:inherit}
+.back-btn:hover{color:var(--text);border-color:#685BC7}
+.tog{width:40px;height:22px;border-radius:11px;border:none;cursor:pointer;position:relative;background:#685BC7;flex-shrink:0}
+[data-theme=light] .tog{background:rgba(104,91,199,0.25)}
+.tog-b{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:transform .3s;font-size:10px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+[data-theme=light] .tog-b{transform:translateX(18px)}
+
+/* Main */
+.main{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+.hero-title{font-size:28px;font-weight:800;text-align:center;margin-bottom:6px}
+.hero-title em{font-style:normal;color:var(--accent)}
+.hero-sub{text-align:center;color:var(--text2);font-size:14px;margin-bottom:30px}
+
+/* Input area */
+.input-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px}
+.input-label{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.input-ta{width:100%;min-height:80px;background:var(--surface2);border:2px solid var(--accent);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit;resize:vertical;outline:none;line-height:1.5;transition:border-color .2s}
+.input-ta:focus{border-color:#fb923c}
+.input-ta::placeholder{color:var(--text3);font-style:italic}
+.hint{margin-top:8px;font-size:11px;color:var(--text3);line-height:1.4}
+
+/* Generate button */
+.gen-btn{
+  width:100%;height:52px;border-radius:14px;
+  background:linear-gradient(135deg,#f97316,#fb923c);
+  border:none;color:#fff;font-size:16px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+  box-shadow:0 4px 20px rgba(249,115,22,.4);
+  transition:opacity .2s,transform .1s;
+  margin-bottom:24px;
+}
+.gen-btn:hover{opacity:.9;transform:scale(1.01)}
+.gen-btn:active{transform:scale(.98)}
+.gen-btn:disabled{opacity:.5;cursor:wait}
+
+/* Results grid */
+.results-title{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:12px;display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+@media(max-width:540px){.grid{grid-template-columns:1fr}}
+
+/* Logo card */
+.logo-card{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  transition:border-color .2s,box-shadow .2s;
+}
+.logo-card:hover{border-color:var(--accent);box-shadow:0 4px 20px rgba(249,115,22,.15)}
+.logo-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--surface2)}
+.logo-card-footer{padding:10px 12px;display:flex;align-items:center;gap:8px}
+.dl-btn{
+  flex:1;height:36px;border-radius:8px;
+  background:var(--surface2);border:1px solid var(--border2);
+  color:var(--text);font-size:12px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all .2s;
+}
+.dl-btn:hover{border-color:var(--accent);color:var(--accent)}
+.regen-sm{
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,#f97316,#fb923c);
+  border:none;color:#fff;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .2s;
+}
+.regen-sm:hover{opacity:.85}
+
+/* Loading skeleton */
+.skel{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;
+}
+.skel-img{
+  width:100%;aspect-ratio:1;
+  background:linear-gradient(110deg,var(--surface2) 30%,var(--border) 50%,var(--surface2) 70%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text3);font-size:13px;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-foot{padding:10px 12px;display:flex;gap:8px}
+.skel-bar{height:36px;border-radius:8px;background:var(--surface2);flex:1}
+
+/* Status */
+.status{text-align:center;color:var(--text2);font-size:13px;padding:16px;display:none}
+.status.show{display:block}
+.error{color:#ef4444}
+
+/* Empty state */
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:48px;margin-bottom:12px;display:block;opacity:.5}
+.empty-text{font-size:14px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <a class="logo" href="index.html">
+    <svg width="32" height="32" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#685BC7"/><path d="M 64,36 A 24,24 0 1,0 64,75" fill="none" stroke="white" stroke-width="17"/><rect x="55" y="67" width="24" height="15" fill="white" rx="1"/><rect x="56" y="35" width="19" height="31" fill="#AADF00"/><circle cx="66" cy="20" r="11" fill="#AADF00"/></svg>
+    <span class="logo-txt">ai<span>trend</span></span>
+  </a>
+  <div class="hdr-r">
+    <a class="back-btn" href="index.html">← Конструктор</a>
+    <button class="tog" onclick="toggleTheme()"><div class="tog-b" id="togB">🌙</div></button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="hero-title">🎨 Генератор <em>логотипов</em></div>
+  <div class="hero-sub">Опиши свой бренд — ИИ нарисует профессиональный логотип</div>
+
+  <div class="input-card">
+    <div class="input-label">✏️ Описание логотипа</div>
+    <textarea class="input-ta" id="prompt" placeholder="Например: космический логотип с ракетой в красном стиле, компания называется Beknur"></textarea>
+    <div class="hint">💡 Напиши название компании, цвет, стиль и что изображено. Чем подробнее — тем лучше результат!</div>
+  </div>
+
+  <button class="gen-btn" id="genBtn" onclick="generate()">🎨 Сгенерировать логотип</button>
+
+  <div class="status" id="status"></div>
+  <div class="results-title" id="resTitle">✨ Твои логотипы</div>
+  <div class="grid" id="grid">
+    <div class="empty" id="empty">
+      <span class="empty-icon">🎨</span>
+      <div class="empty-text">Здесь появятся твои логотипы.<br>Опиши бренд и нажми «Сгенерировать»!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Theme
+const t = localStorage.getItem('aitrend_theme')||'dark';
+document.documentElement.setAttribute('data-theme',t);
+document.getElementById('togB').textContent = t==='dark'?'🌙':'☀️';
+function toggleTheme(){
+  const c = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',c);
+  localStorage.setItem('aitrend_theme',c);
+  document.getElementById('togB').textContent = c==='dark'?'🌙':'☀️';
+}
+
+let busy = false;
+
+function setStatus(text, isErr){
+  const el = document.getElementById('status');
+  el.className = 'status show' + (isErr?' error':'');
+  el.textContent = text;
+}
+function hideStatus(){ document.getElementById('status').className = 'status'; }
+
+function addSkeleton(){
+  const grid = document.getElementById('grid');
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('resTitle').style.display = 'block';
+  const sk = document.createElement('div');
+  sk.className = 'skel';
+  sk.id = 'skel';
+  sk.innerHTML = '<div class="skel-img">⏳ ИИ рисует логотип...</div><div class="skel-foot"><div class="skel-bar"></div><div class="skel-bar" style="width:36px;flex:none"></div></div>';
+  grid.prepend(sk);
+}
+function removeSkeleton(){
+  const sk = document.getElementById('skel');
+  if(sk) sk.remove();
+}
+
+function addLogoCard(dataUrl, prompt){
+  const grid = document.getElementById('grid');
+  const card = document.createElement('div');
+  card.className = 'logo-card';
+  card.innerHTML = `
+    <img src="${dataUrl}" alt="Logo">
+    <div class="logo-card-footer">
+      <button class="dl-btn" onclick="downloadLogo(this)">💾 Скачать PNG</button>
+      <button class="regen-sm" onclick="generate()" title="Ещё вариант">🔄</button>
+    </div>`;
+  card._dataUrl = dataUrl;
+  grid.prepend(card);
+}
+
+function downloadLogo(btn){
+  const card = btn.closest('.logo-card');
+  const img = card.querySelector('img');
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = 'logo-aitrend.png';
+  a.click();
+}
+
+async function generate(){
+  const prompt = document.getElementById('prompt').value.trim();
+  if(!prompt){ setStatus('Введи описание логотипа',true); return; }
+  if(busy) return;
+  busy = true;
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true; btn.textContent = '⏳ Генерирую... (15-30 сек)';
+  hideStatus();
+  addSkeleton();
+
+  try {
+    const res = await fetch('/api/logo',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+
+    if(!res.ok || !data.b64){
+      throw new Error(data.error || 'Ошибка генерации');
+    }
+
+    const dataUrl = 'data:image/png;base64,' + data.b64;
+    removeSkeleton();
+    addLogoCard(dataUrl, prompt);
+    hideStatus();
+
+  } catch(e){
+    removeSkeleton();
+    setStatus('❌ ' + e.message, true);
+  }
+
+  busy = false;
+  btn.disabled = false; btn.textContent = '🎨 Сгенерировать ещё';
+}
+</script>
+</body>
+</html>

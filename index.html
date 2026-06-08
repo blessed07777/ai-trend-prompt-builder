@@ -104,31 +104,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .card-ta::placeholder{color:var(--text3);font-style:italic}
 .card-hint{margin-top:7px;font-size:11px;color:var(--text2);display:flex;align-items:flex-start;gap:4px;line-height:1.4}
 
-/* Logo gen */
-.btn-gen-logo{
-  margin-top:8px;width:100%;height:40px;border-radius:10px;
-  background:linear-gradient(135deg,#f97316,#fb923c);
-  border:none;color:#fff;font-size:14px;font-weight:700;
-  cursor:pointer;font-family:inherit;
-  transition:opacity .2s,transform .1s;
-  box-shadow:0 3px 12px rgba(249,115,22,.35);
-}
-.btn-gen-logo:hover{opacity:.9;transform:scale(1.01)}
-.btn-gen-logo:active{transform:scale(.98)}
-.btn-gen-logo:disabled{opacity:.5;cursor:wait}
-.logo-preview{
-  margin-top:10px;border-radius:10px;overflow:hidden;
-  background:var(--surface2);border:1.5px solid var(--border);
-  min-height:0;transition:min-height .3s;
-  text-align:center;
-}
-.logo-preview:has(img[style*="block"]){min-height:180px}
-.logo-loading{padding:18px;color:var(--text2);font-size:13px}
-.logo-preview img{
-  width:100%;max-height:260px;object-fit:contain;
-  border-radius:8px;display:block;
-}
-
 /* ── WIREFRAME ── */
 .wf-panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;height:100%;transition:background .3s}
 .wf-hdr{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0}
@@ -534,39 +509,33 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <script>
 // ─── BLOCK CONFIG ───────────────────────────────────────────
 const BLOCKS = [
-  {id:'logo',    n:1, em:'🎨', name:'Логотип',       acc:'#f97316',
-   q:'Опиши какой логотип ты хочешь для сайта',
-   ph:'Например: Космический логотип с ракетой, фиолетовый фон, минималистичный стиль',
-   hint:'Опиши стиль, цвет, что изображено — ИИ сгенерирует логотип в реальном времени!',
-   wf:'wfs-header'},
-
-  {id:'header',  n:2, em:'🔝', name:'Шапка',         acc:'#3b82f6',
+  {id:'header',  n:1, em:'🔝', name:'Шапка',         acc:'#3b82f6',
    q:'Что будет в шапке сайта?',
    ph:'Например: Логотип с именем, меню: Главная, Портфолио, Обо мне, Контакты',
    hint:'Логотип, название, пункты навигации', wf:'wfs-header'},
 
-  {id:'hero',    n:3, em:'🎯', name:'Главный экран', acc:'#f59e0b',
+  {id:'hero',    n:2, em:'🎯', name:'Главный экран', acc:'#f59e0b',
    q:'Что увидит посетитель первым делом?',
    ph:'Например: Большой заголовок "Я создаю красивые сайты", подзаголовок и кнопка "Смотреть работы"',
    hint:'Заголовок, подзаголовок, кнопка призыва к действию', wf:'wfs-hero'},
 
-  {id:'about_me',n:4, em:'👤', name:'Обо мне',       acc:'#22c55e',
+  {id:'about_me',n:3, em:'👤', name:'Обо мне',       acc:'#22c55e',
    q:'Что рассказать о себе?',
    ph:'Например: Меня зовут Иван, мне 16 лет. Учусь на разработчика, люблю создавать сайты.',
    hint:'Фото, имя, возраст, увлечения', wf:'wfs-about'},
 
-  {id:'contacts',  n:5, em:'📬', name:'Контакты',         acc:'#06b6d4',
+  {id:'contacts',  n:4, em:'📬', name:'Контакты',         acc:'#06b6d4',
    q:'Как с тобой можно связаться?',
    ph:'Например: Email hello@mail.ru, Telegram @username, GitHub, ВКонтакте',
    hint:'Email, соцсети, мессенджеры', wf:'wfs-contacts'},
 
-  {id:'whatsapp',n:6, em:'📱', name:'Заявки (WhatsApp)', acc:'#25d366',
+  {id:'whatsapp',n:5, em:'📱', name:'Заявки (WhatsApp)', acc:'#25d366',
    q:'Напиши номер WhatsApp и текст приветствия для кнопки',
    ph:'Номер: +77071234567\nТекст кнопки: Привет! Хочу заказать сайт 🚀',
    hint:'Первая строка — номер (например +77071234567), вторая — готовый текст, который увидит клиент при нажатии на кнопку',
    wf:'wfs-contacts'},
 
-  {id:'style_anim',n:7, em:'✨', name:'Стиль & Анимации', acc:'#a855f7',
+  {id:'style_anim',n:6, em:'✨', name:'Стиль & Анимации', acc:'#a855f7',
    q:'Как должен выглядеть сайт и какие анимации ты хочешь?',
    ph:'Например: тёмный фон, фиолетовые акценты #8b5cf6, плавный fade-in при скролле, hover-эффекты на кнопках, glassmorphism-карточки, частицы на фоне',
    hint:'Цвета, шрифт, анимации появления, hover-эффекты, общее настроение',
@@ -619,13 +588,6 @@ function renderCards(){
       </div>
       <div class="card-q">${b.q}</div>
       <textarea class="card-ta" id="ta-${b.id}" placeholder="${b.ph}"></textarea>
-      ${b.id==='logo' ? `
-        <button class="btn-gen-logo" id="btnGenLogo" onclick="genLogo()">🎨 Сгенерировать логотип</button>
-        <div class="logo-preview" id="logoPreview">
-          <div class="logo-loading" id="logoLoading" style="display:none">⏳ Генерирую логотип...</div>
-          <img id="logoImg" style="display:none" alt="Логотип">
-        </div>
-      ` : ''}
       <div class="card-hint">💡 ${b.hint}</div>`;
     col.appendChild(d);
 
@@ -661,185 +623,6 @@ function onBlur(b){
   if(el) el.classList.remove('act');
 }
 
-// ─── LOGO GENERATION ─────────────────────────────────────────
-const LOGO_STYLES = [
-  {shape:'circle',    grad:['#685BC7','#8b5cf6']},
-  {shape:'roundrect', grad:['#3b82f6','#06b6d4']},
-  {shape:'circle',    grad:['#ef4444','#f97316']},
-  {shape:'roundrect', grad:['#22c55e','#06b6d4']},
-  {shape:'circle',    grad:['#f59e0b','#ef4444']},
-  {shape:'roundrect', grad:['#ec4899','#8b5cf6']},
-  {shape:'circle',    grad:['#111827','#374151']},
-  {shape:'roundrect', grad:['#0ea5e9','#3b82f6']},
-  {shape:'hexagon',   grad:['#7c3aed','#a78bfa']},
-  {shape:'diamond',   grad:['#dc2626','#f97316']},
-  {shape:'shield',    grad:['#1e40af','#3b82f6']},
-  {shape:'hexagon',   grad:['#059669','#34d399']},
-  {shape:'roundrect', grad:['#be185d','#ec4899']},
-  {shape:'circle',    grad:['#0f172a','#1e293b']},
-  {shape:'shield',    grad:['#7c3aed','#c084fc']},
-  {shape:'diamond',   grad:['#f59e0b','#fbbf24']},
-  {shape:'hexagon',   grad:['#0891b2','#22d3ee']},
-  {shape:'roundrect', grad:['#4f46e5','#818cf8']},
-  {shape:'shield',    grad:['#15803d','#4ade80']},
-  {shape:'circle',    grad:['#9333ea','#e879f9']},
-  {shape:'diamond',   grad:['#1d4ed8','#60a5fa']},
-  {shape:'hexagon',   grad:['#b91c1c','#fca5a5']},
-  {shape:'roundrect', grad:['#0d9488','#5eead4']},
-  {shape:'shield',    grad:['#c2410c','#fb923c']},
-];
-
-function genLogo(){
-  const desc = (S.vals.logo||'').trim();
-  if(desc.length < 2) return;
-  const btn = document.getElementById('btnGenLogo');
-  const loading = document.getElementById('logoLoading');
-  const img = document.getElementById('logoImg');
-
-  loading.style.display = 'none';
-
-  // Extract brand name — first capitalized word or first word
-  const words = desc.split(/[\s,;.!]+/).filter(w=>w.length>0);
-  let brand = '';
-  for(const w of words){
-    if(w.length >= 2 && /[A-ZА-ЯЁ]/.test(w[0])){ brand = w; break; }
-  }
-  if(!brand) brand = words[words.length-1] || 'Logo';
-  const initials = brand.slice(0,2).toUpperCase();
-
-  // Pick style based on description
-  const seed = Math.floor(Math.random()*LOGO_STYLES.length);
-  const style = LOGO_STYLES[seed];
-
-  // Detect color hints
-  let c1 = style.grad[0], c2 = style.grad[1];
-  const colorHints = {
-    'красн':['#ef4444','#dc2626'], 'синий':['#3b82f6','#2563eb'], 'синем':['#3b82f6','#2563eb'],
-    'голуб':['#06b6d4','#0ea5e9'], 'зелен':['#22c55e','#16a34a'], 'фиолет':['#8b5cf6','#7c3aed'],
-    'оранж':['#f97316','#ea580c'], 'розов':['#ec4899','#db2777'], 'чёрн':['#1f2937','#111827'],
-    'жёлт':['#f59e0b','#d97706'], 'бел':['#f8fafc','#e2e8f0'],
-    'red':['#ef4444','#dc2626'], 'blue':['#3b82f6','#2563eb'], 'green':['#22c55e','#16a34a'],
-    'purple':['#8b5cf6','#7c3aed'], 'orange':['#f97316','#ea580c'], 'black':['#1f2937','#111827'],
-  };
-  const dl = desc.toLowerCase();
-  for(const [k,v] of Object.entries(colorHints)){
-    if(dl.includes(k)){ c1=v[0]; c2=v[1]; break; }
-  }
-
-  const isLight = ['#f8fafc','#f59e0b','#fbbf24','#AADF00','#fca5a5','#5eead4','#4ade80','#e879f9','#34d399','#22d3ee','#60a5fa','#c084fc'].includes(c2);
-  const textColor = isLight ? '#1f2937' : '#ffffff';
-
-  // Shapes
-  const shapes = {
-    circle:    '<circle cx="128" cy="128" r="120" fill="url(#g)"/>',
-    roundrect: '<rect x="8" y="8" width="240" height="240" rx="48" fill="url(#g)"/>',
-    hexagon:   '<polygon points="128,8 240,68 240,188 128,248 16,188 16,68" fill="url(#g)"/>',
-    diamond:   '<polygon points="128,8 240,128 128,248 16,128" fill="url(#g)"/>',
-    shield:    '<path d="M128,8 L240,50 L240,160 Q240,220 128,248 Q16,220 16,160 L16,50 Z" fill="url(#g)"/>',
-  };
-  const shapeEl = shapes[style.shape] || shapes.roundrect;
-
-  // Decorative elements — 10 variations
-  const decoIdx = Math.floor(Math.random()*10);
-  const tc = textColor;
-  const decos = [
-    `<circle cx="200" cy="56" r="28" fill="${tc}" opacity="0.1"/>`,
-    `<rect x="165" y="30" width="55" height="55" rx="14" fill="${tc}" opacity="0.08" transform="rotate(20 190 55)"/>`,
-    `<polygon points="128,16 145,50 111,50" fill="${tc}" opacity="0.1"/>`,
-    `<circle cx="56" cy="200" r="20" fill="${tc}" opacity="0.08"/><circle cx="200" cy="52" r="14" fill="${tc}" opacity="0.1"/>`,
-    `<line x1="30" y1="30" x2="80" y2="30" stroke="${tc}" stroke-width="3" opacity="0.12" stroke-linecap="round"/><line x1="176" y1="226" x2="226" y2="226" stroke="${tc}" stroke-width="3" opacity="0.12" stroke-linecap="round"/>`,
-    `<circle cx="200" cy="60" r="8" fill="${tc}" opacity="0.2"/><circle cx="215" cy="80" r="5" fill="${tc}" opacity="0.15"/><circle cx="190" cy="45" r="4" fill="${tc}" opacity="0.12"/>`,
-    `<rect x="180" y="170" width="40" height="40" rx="8" fill="${tc}" opacity="0.06" transform="rotate(45 200 190)"/>`,
-    `<path d="M40,200 Q70,170 60,210" stroke="${tc}" stroke-width="2" fill="none" opacity="0.1"/><path d="M196,40 Q226,30 210,60" stroke="${tc}" stroke-width="2" fill="none" opacity="0.1"/>`,
-    `<circle cx="128" cy="128" r="100" fill="none" stroke="${tc}" stroke-width="1" opacity="0.08"/>`,
-    `<circle cx="48" cy="48" r="12" fill="${tc}" opacity="0.08"/><circle cx="208" cy="208" r="12" fill="${tc}" opacity="0.08"/>`,
-  ];
-
-  // Detect themed icons from description
-  const iconMap = {
-    'космос':['🚀','✦','⟡'], 'ракет':['🚀','△','⬡'], 'space':['🚀','✦','◇'],
-    'rocket':['△','✦','⟡'], 'код':['⟨/⟩','▧','◈'], 'програм':['⟨/⟩','▧','◈'],
-    'code':['⟨/⟩','▧','◈'], 'dev':['⟨/⟩','▧','◈'], 'музык':['♪','♫','◎'],
-    'music':['♪','♫','◎'], 'игр':['▶','◆','⬡'], 'game':['▶','◆','⬡'],
-    'фото':['◎','⬡','□'], 'photo':['◎','⬡','□'], 'дизайн':['◈','✦','△'],
-    'design':['◈','✦','△'], 'стил':['✦','◇','◈'], 'еда':['◎','○','◇'],
-    'food':['◎','○','◇'], 'спорт':['★','△','◆'], 'sport':['★','△','◆'],
-    'учёб':['◇','▧','◈'], 'школ':['◇','▧','◈'], 'бизнес':['◆','▧','△'],
-    'студи':['✦','◈','◎'], 'studio':['✦','◈','◎'], 'tech':['⬡','◈','▧'],
-    'тех':['⬡','◈','▧'],
-  };
-  let iconChar = '✦';
-  for(const [k,v] of Object.entries(iconMap)){
-    if(dl.includes(k)){ iconChar = v[Math.floor(Math.random()*v.length)]; break; }
-  }
-
-  // Text layouts — 8 variations
-  const layoutIdx = Math.floor(Math.random()*8);
-  const brandUp = brand.toUpperCase();
-  const bSize = Math.min(56, 320/brand.length);
-  const layouts = [
-    // 0: Icon above + initials + name
-    `<text x="128" y="90" text-anchor="middle" font-family="system-ui,sans-serif" font-size="42" fill="${tc}" opacity="0.3">${iconChar}</text>
-     <text x="128" y="152" text-anchor="middle" font-family="system-ui,sans-serif" font-size="64" font-weight="900" fill="${tc}" letter-spacing="-2">${initials}</text>
-     <text x="128" y="205" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="${tc}" opacity="0.55" letter-spacing="5">${brandUp}</text>`,
-    // 1: Full name bold centered with accent line
-    `<text x="128" y="125" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${bSize}" font-weight="900" fill="${tc}" letter-spacing="-1">${brandUp}</text>
-     <line x1="58" y1="148" x2="198" y2="148" stroke="${tc}" stroke-width="3" opacity="0.35" stroke-linecap="round"/>
-     <text x="128" y="180" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="${tc}" opacity="0.45" letter-spacing="3">${iconChar} STUDIO</text>`,
-    // 2: Big single letter serif + small name
-    `<text x="128" y="155" text-anchor="middle" font-family="Georgia,Times,serif" font-size="120" font-weight="700" fill="${tc}" opacity="0.85">${initials[0]}</text>
-     <text x="128" y="216" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="800" fill="${tc}" opacity="0.45" letter-spacing="7">${brandUp}</text>`,
-    // 3: Stacked with divider bar
-    `<text x="128" y="108" text-anchor="middle" font-family="system-ui,sans-serif" font-size="58" font-weight="900" fill="${tc}" letter-spacing="-2">${initials}</text>
-     <rect x="42" y="122" width="172" height="3" rx="2" fill="${tc}" opacity="0.25"/>
-     <text x="128" y="168" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" font-weight="700" fill="${tc}" opacity="0.65" letter-spacing="3">${brandUp}</text>
-     <text x="128" y="198" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="${tc}" opacity="0.3" letter-spacing="2">${iconChar} EST. 2025</text>`,
-    // 4: Monogram ring + name
-    `<circle cx="128" cy="105" r="52" fill="none" stroke="${tc}" stroke-width="3" opacity="0.2"/>
-     <circle cx="128" cy="105" r="42" fill="${tc}" opacity="0.08"/>
-     <text x="128" y="118" text-anchor="middle" font-family="system-ui,sans-serif" font-size="44" font-weight="900" fill="${tc}">${initials}</text>
-     <text x="128" y="208" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="800" fill="${tc}" opacity="0.55" letter-spacing="5">${brandUp}</text>`,
-    // 5: Side icon + name horizontal
-    `<text x="68" y="135" text-anchor="middle" font-family="system-ui,sans-serif" font-size="60" fill="${tc}" opacity="0.25">${iconChar}</text>
-     <text x="168" y="125" text-anchor="middle" font-family="system-ui,sans-serif" font-size="42" font-weight="900" fill="${tc}">${initials}</text>
-     <text x="128" y="195" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" font-weight="700" fill="${tc}" opacity="0.5" letter-spacing="4">${brandUp}</text>`,
-    // 6: Boxed initials + underline
-    `<rect x="64" y="52" width="128" height="100" rx="16" fill="${tc}" opacity="0.1"/>
-     <text x="128" y="118" text-anchor="middle" font-family="system-ui,sans-serif" font-size="56" font-weight="900" fill="${tc}">${initials}</text>
-     <text x="128" y="200" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="800" fill="${tc}" opacity="0.6" letter-spacing="3">${brandUp}</text>`,
-    // 7: Minimal dot + name
-    `<circle cx="128" cy="82" r="18" fill="${tc}" opacity="0.2"/>
-     <text x="128" y="90" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="900" fill="${tc}">${initials[0]}</text>
-     <text x="128" y="148" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${Math.min(44,280/brand.length)}" font-weight="900" fill="${tc}" letter-spacing="-1">${brandUp}</text>
-     <text x="128" y="195" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="${tc}" opacity="0.35" letter-spacing="3">${iconChar} CREATIVE</text>`,
-  ];
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
-    <defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/>
-    </linearGradient></defs>
-    ${shapeEl}
-    ${decos[decoIdx]}
-    ${layouts[layoutIdx]}
-  </svg>`;
-
-  const blob = new Blob([svg], {type:'image/svg+xml'});
-  const url = URL.createObjectURL(blob);
-
-  img.src = url;
-  img.style.display = 'block';
-  loading.style.display = 'none';
-  btn.textContent = '🔄 Другой вариант';
-
-  S.logoUrl = url;
-
-  // Update wireframe header
-  const wfLogo = document.getElementById('wfLogo');
-  if(wfLogo){
-    wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+url+') center/contain no-repeat';
-  }
-  document.getElementById('wfs-header').classList.add('fill');
-}
 
 // ─── PROGRESS ────────────────────────────────────────────────
 function updateProgress(){
@@ -885,11 +668,6 @@ function updateWF(b, v){
   const filled = v.length > 3;
 
   switch(b.id){
-    case 'logo':{
-      // Logo block just marks header as partially filled — actual gen via button
-      document.getElementById('wfs-header').classList.toggle('fill', filled);
-      break;
-    }
     case 'header':{
       // nav items
       const items = v.split(/[,;|\/]/).map(s=>s.replace(/[•\-–]/g,'').trim()).filter(s=>s.length>1&&s.length<24);
@@ -1118,7 +896,7 @@ function buildStaticPrompt(){
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'(не заполнено)'}`;
   S.pRu = [
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
-    sec('logo','ЛОГОТИП'), sec('about_me','ОБО МНЕ'),
+    sec('about_me','ОБО МНЕ'),
     sec('contacts','КОНТАКТЫ'), sec('whatsapp','ЗАЯВКИ WHATSAPP'),
     sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
@@ -1204,7 +982,7 @@ function buildUserContent(){
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'не указано'}`;
   return 'Создай промпт для разработки сайта по описанию ниже:\n\n'+[
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
-    sec('logo','ЛОГОТИП'), sec('about_me','ОБО МНЕ'),
+    sec('about_me','ОБО МНЕ'),
     sec('contacts','КОНТАКТЫ'), sec('whatsapp','ЗАЯВКИ WHATSAPP'),
     sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
