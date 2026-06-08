@@ -701,7 +701,7 @@ async function genLogo(){
   loading.textContent = '⏳ DALL-E генерирует логотип...';
   img.style.display = 'none';
 
-  // Try DALL-E first
+  // Try DALL-E 3 via Vercel API
   try {
     const res = await fetch('/api/logo', {
       method: 'POST',
@@ -713,17 +713,19 @@ async function genLogo(){
       img.src = data.url;
       img.style.display = 'block';
       loading.style.display = 'none';
-      btn.disabled = false; btn.textContent = '🔄 Другой вариант';
+      btn.disabled = false; btn.textContent = '🔄 Другой вариант (DALL-E 3)';
       S.logoUrl = data.url;
       const wfLogo = document.getElementById('wfLogo');
       if(wfLogo) wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+data.url+') center/contain no-repeat';
       document.getElementById('wfs-header').classList.add('fill');
       return;
     }
-  } catch(e){}
+    // API returned error — fall through to SVG
+  } catch(e){
+    // Network error or local dev — fall through to SVG
+  }
 
-  // Fallback to SVG generator
-  loading.textContent = '🎨 Создаю SVG логотип...';
+  // Fallback to SVG generator (offline/local mode)
   btn.disabled = false;
 
   // Extract brand name — first capitalized word or first word
