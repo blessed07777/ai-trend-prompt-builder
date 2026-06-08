@@ -529,7 +529,13 @@ const BLOCKS = [
    ph:'Например: Email hello@mail.ru, Telegram @username, GitHub, ВКонтакте',
    hint:'Email, соцсети, мессенджеры', wf:'wfs-contacts'},
 
-  {id:'style_anim',n:5, em:'✨', name:'Стиль & Анимации', acc:'#a855f7',
+  {id:'whatsapp',n:5, em:'📱', name:'Заявки (WhatsApp)', acc:'#25d366',
+   q:'Введи номер WhatsApp для приёма заявок с сайта',
+   ph:'Например: +7 999 123 45 67',
+   hint:'Номер телефона с WhatsApp — посетители смогут отправить заявку прямо с сайта',
+   wf:'wfs-contacts'},
+
+  {id:'style_anim',n:6, em:'✨', name:'Стиль & Анимации', acc:'#a855f7',
    q:'Как должен выглядеть сайт и какие анимации ты хочешь?',
    ph:'Например: тёмный фон, фиолетовые акценты #8b5cf6, плавный fade-in при скролле, hover-эффекты на кнопках, glassmorphism-карточки, частицы на фоне',
    hint:'Цвета, шрифт, анимации появления, hover-эффекты, общее настроение',
@@ -744,6 +750,22 @@ function updateWF(b, v){
       document.getElementById('wfs-style').classList.toggle('fill',filled);
       break;
     }
+    case 'whatsapp':{
+      const hasNum = v.replace(/\D/g,'').length >= 7;
+      if(hasNum){
+        const cont = document.getElementById('wfCont');
+        // Add WhatsApp icon if not already there
+        if(!cont.querySelector('.wa-icon')){
+          const wa = document.createElement('div');
+          wa.className = 'wfr-ci wa-icon';
+          wa.textContent = '💬';
+          wa.title = 'WhatsApp заявки';
+          cont.insertBefore(wa, cont.firstChild);
+        }
+      }
+      document.getElementById('wfs-contacts').classList.toggle('fill', filled);
+      break;
+    }
     case 'contacts':{
       const MAP = {
         'email':'✉️','почта':'✉️','gmail':'✉️','mail':'✉️',
@@ -874,7 +896,8 @@ function buildStaticPrompt(){
   S.pRu = [
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
     sec('about_me','ОБО МНЕ'),
-    sec('contacts','КОНТАКТЫ'), sec('style_anim','СТИЛЬ И АНИМАЦИИ')
+    sec('contacts','КОНТАКТЫ'), sec('whatsapp','ЗАЯВКИ WHATSAPP'),
+    sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
   document.getElementById('pout').textContent = S.pRu;
 }
@@ -910,6 +933,9 @@ async function generate(){
 • Micro-interactions: кнопки с ripple/scale, карточки с 3D-наклоном при hover
 • Smooth scroll, loading-анимация, stagger-эффекты для списков
 
+ВАЖНО — ФОРМА ЗАЯВКИ ЧЕРЕЗ WHATSAPP:
+Если указан номер WhatsApp, обязательно добавь секцию с формой заявки. Форма собирает имя и сообщение, при отправке открывает WhatsApp с готовым текстом через ссылку https://wa.me/НОМЕР?text=ТЕКСТ. Используй encodeURIComponent для текста. Также добавь кнопку «Написать в WhatsApp» с иконкой. Стилизуй кнопку в зелёном цвете (#25d366).
+
 Используй разделители ━━━ РАЗДЕЛ ━━━. В конце добавь ━━━ ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ ━━━ с конкретными библиотеками (GSAP, AOS, Lottie и т.д.) если нужно. Пиши только на русском языке.`;
 
   const SYS_EN = `You are an expert web developer, designer and prompt engineer. Based on the user's description, create a detailed, professional prompt for an AI site developer.
@@ -922,6 +948,9 @@ IMPORTANT — the site must be visually stunning:
 • Hero section: full-screen with animated background (gradient, particles or waves)
 • Micro-interactions: buttons with ripple/scale, cards with 3D-tilt on hover
 • Smooth scroll, loading animation, stagger effects for lists
+
+IMPORTANT — WHATSAPP CONTACT FORM:
+If a WhatsApp number is provided, add a contact form section. The form collects name and message, on submit opens WhatsApp via https://wa.me/NUMBER?text=TEXT link. Use encodeURIComponent for the text. Also add a "Message on WhatsApp" button with icon. Style the button in green (#25d366).
 
 Use ━━━ SECTION ━━━ separators. End with ━━━ TECHNICAL REQUIREMENTS ━━━ listing specific libraries (GSAP, AOS, Lottie etc.) if needed. Write in English only.`;
 
@@ -953,7 +982,8 @@ function buildUserContent(){
   return 'Создай промпт для разработки сайта по описанию ниже:\n\n'+[
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
     sec('about_me','ОБО МНЕ'),
-    sec('contacts','КОНТАКТЫ'), sec('style_anim','СТИЛЬ И АНИМАЦИИ')
+    sec('contacts','КОНТАКТЫ'), sec('whatsapp','ЗАЯВКИ WHATSAPP'),
+    sec('style_anim','СТИЛЬ И АНИМАЦИИ')
   ].join('\n\n');
 }
 
