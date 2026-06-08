@@ -572,7 +572,22 @@ const S = {vals:{}, lang:'ru', pRu:'', pEn:'', busy:false};
   renderCards();
   initDivider();
   updateProgress();
+  loadSavedLogo();
 })();
+
+// ─── LOAD SAVED LOGO ────────────────────────────────────────
+function loadSavedLogo(){
+  const logoData = localStorage.getItem('aitrend_logo');
+  if(!logoData) return;
+  const wfLogo = document.getElementById('wfLogo');
+  if(wfLogo){
+    wfLogo.style.cssText = 'width:28px;height:28px;border-radius:4px;opacity:1;background:url('+logoData+') center/contain no-repeat';
+  }
+  document.getElementById('wfs-header').classList.add('fill');
+  // Update header logo link to show checkmark
+  const logoBtn = document.querySelector('.btn-logo-link');
+  if(logoBtn) logoBtn.textContent = '✅ Логотип';
+}
 
 // ─── RENDER PILLS ────────────────────────────────────────────
 function renderNav(){
@@ -995,12 +1010,14 @@ Use ━━━ SECTION ━━━ separators. End with ━━━ TECHNICAL REQUIRE
 function buildUserContent(){
   const v = S.vals;
   const sec = (id, lbl) => `━━━ ${lbl} ━━━\n${v[id]||'не указано'}`;
+  const logoPrompt = localStorage.getItem('aitrend_logo_prompt');
+  const logoSection = logoPrompt ? '\n\n━━━ ЛОГОТИП ━━━\n'+logoPrompt+'\n(Логотип уже сгенерирован отдельно — в шапку сайта вставь текстовый логотип с названием бренда в стиле описания выше)' : '';
   return 'Создай промпт для разработки сайта по описанию ниже:\n\n'+[
     sec('header','ШАПКА'), sec('hero','ГЛАВНЫЙ ЭКРАН'),
     sec('about_me','ОБО МНЕ'),
     sec('contacts','КОНТАКТЫ'), sec('whatsapp','ЗАЯВКИ WHATSAPP'),
     sec('style_anim','СТИЛЬ И АНИМАЦИИ')
-  ].join('\n\n');
+  ].join('\n\n') + logoSection;
 }
 
 async function streamChat(sys, user, outEl){

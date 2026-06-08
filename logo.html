@@ -76,6 +76,15 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   transition:all .2s;
 }
 .dl-btn:hover{border-color:var(--accent);color:var(--accent)}
+.insert-btn{
+  flex:1.5;height:36px;border-radius:8px;
+  background:var(--surface2);border:1px solid #685BC7;
+  color:#685BC7;font-size:12px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all .2s;
+}
+.insert-btn:hover{background:#685BC7;color:#fff}
 .regen-sm{
   width:36px;height:36px;border-radius:8px;
   background:linear-gradient(135deg,#f97316,#fb923c);
@@ -183,27 +192,54 @@ function removeSkeleton(){
   if(sk) sk.remove();
 }
 
-function addLogoCard(dataUrl, prompt){
+function addLogoCard(blobUrl, prompt){
   const grid = document.getElementById('grid');
   const card = document.createElement('div');
   card.className = 'logo-card';
   card.innerHTML = `
-    <img src="${dataUrl}" alt="Logo">
+    <img src="${blobUrl}" alt="Logo">
     <div class="logo-card-footer">
-      <button class="dl-btn" onclick="downloadLogo(this)">💾 Скачать PNG</button>
+      <button class="dl-btn" onclick="downloadLogo(this)">💾 Скачать</button>
+      <button class="insert-btn" onclick="insertToSite(this)">🌐 Вставить в сайт</button>
       <button class="regen-sm" onclick="generate()" title="Ещё вариант">🔄</button>
     </div>`;
-  card._dataUrl = dataUrl;
   grid.prepend(card);
 }
 
 function downloadLogo(btn){
-  const card = btn.closest('.logo-card');
-  const img = card.querySelector('img');
+  const img = btn.closest('.logo-card').querySelector('img');
   const a = document.createElement('a');
   a.href = img.src;
   a.download = 'logo-aitrend.png';
   a.click();
+}
+
+async function insertToSite(btn){
+  const card = btn.closest('.logo-card');
+  const img = card.querySelector('img');
+  btn.textContent = '⏳ Сохраняю...';
+  btn.disabled = true;
+
+  try {
+    // Convert blob URL to base64 for localStorage
+    const res = await fetch(img.src);
+    const blob = await res.blob();
+    const reader = new FileReader();
+    reader.onloadend = function(){
+      localStorage.setItem('aitrend_logo', reader.result);
+      localStorage.setItem('aitrend_logo_prompt', document.getElementById('prompt').value.trim());
+      btn.textContent = '✅ Вставлен!';
+      btn.style.background = '#22c55e';
+      btn.style.borderColor = '#22c55e';
+      btn.style.color = '#fff';
+      // Redirect after short delay
+      setTimeout(function(){ window.location.href = 'index.html'; }, 800);
+    };
+    reader.readAsDataURL(blob);
+  } catch(e){
+    btn.textContent = '❌ Ошибка';
+    btn.disabled = false;
+  }
 }
 
 async function generate(){
